@@ -16,6 +16,8 @@ class LoginViewmodel extends BaseViewmodel
       StreamController<String>.broadcast();
   final StreamController<void> _areAllInputsValidStreamController =
       StreamController<void>.broadcast();
+  final StreamController<bool> _rememberMeStreamController =
+      StreamController<bool>.broadcast();
 
   final StreamController isUserLoggedInStreamController =
       StreamController<bool>.broadcast();
@@ -23,15 +25,20 @@ class LoginViewmodel extends BaseViewmodel
   Stream<bool> get outIsLoading => _isLoadingController.stream;
 
   var loginObject = LoginObject("", "");
+  bool _rememberMe = false;
+  
   final LoginUsecase _loginUseCase;
   final AppPreferences _appPreferences;
+  
   LoginViewmodel(this._loginUseCase, this._appPreferences);
+  
   @override
   void dispose() {
     super.dispose();
     _emailStreamController.close();
     _passwordStreamController.close();
     _areAllInputsValidStreamController.close();
+    _rememberMeStreamController.close();
     isUserLoggedInStreamController.close();
     _isLoadingController.close();
   }
@@ -39,6 +46,29 @@ class LoginViewmodel extends BaseViewmodel
   @override
   void start() {
     inputState.add(ContentState());
+    _loadRememberedCredentials();
+  }
+
+  /// Load remembered credentials if available
+  Future<void> _loadRememberedCredentials() async {
+    try {
+      final hasRemembered = await _appPreferences.hasRememberedCredentials();
+      if (hasRemembered) {
+        final credentials = await _appPreferences.getRememberedCredentials();
+        final email = credentials['email'] ?? '';
+        final password = credentials['password'] ?? '';
+        
+        // Update the login object and streams
+        loginObject = loginObject.copyWith(email: email, password: password);
+        setEmail(email);
+        setPassword(password);
+        setRememberMe(true);
+        
+        debugPrint('[LoginViewModel] Loaded remembered credentials for: $email');
+      }
+    } catch (e) {
+      debugPrint('[LoginViewModel] Error loading remembered credentials: $e');
+    }
   }
 
   @override
@@ -49,6 +79,12 @@ class LoginViewmodel extends BaseViewmodel
 
   @override
   Sink<String> get inputPassword => _passwordStreamController.sink;
+
+  @override
+  Sink<bool> get inputRememberMe => _rememberMeStreamController.sink;
+
+  @override
+  Stream<bool> get outRememberMe => _rememberMeStreamController.stream;
 
   @override
   Future<void> login() async {
@@ -62,7 +98,6 @@ class LoginViewmodel extends BaseViewmodel
       result.fold(
         (failure) {
           _isLoadingController.add(false);
-
           inputState.add(
             ErrorState(StateRendererType.popErrorState, failure.message),
           );
@@ -70,17 +105,34 @@ class LoginViewmodel extends BaseViewmodel
         (data) async {
           _isLoadingController.add(false);
 
+          // Save token
           await _appPreferences.deleteAccessToken();
           await _appPreferences.saveAccessToken(data.token);
-          debugPrint('Token is saved successfully' + data.token);
+          debugPrint('Token is saved successfully: ${data.token}');
 
-          // ✅ Add success signal
+          // Handle remember me functionality
+          if (_rememberMe) {
+            await _appPreferences.setRememberMe(
+              true,
+              email: loginObject.email,
+              password: loginObject.password,
+            );
+            debugPrint('[LoginViewModel] Credentials saved for remember me');
+          } else {
+            await _appPreferences.setRememberMe(false);
+            debugPrint('[LoginViewModel] Remember me disabled, credentials cleared');
+          }
+
+          // Set user as logged in
+          await _appPreferences.setUserLoggedIn();
+
+          // Signal successful login
           isUserLoggedInStreamController.add(true);
-
-          inputState.add(ContentState()); // Clear loader state
+          inputState.add(ContentState());
         },
       );
     } catch (e) {
+      _isLoadingController.add(false);
       inputState.add(ErrorState(StateRendererType.popErrorState, e.toString()));
     }
   }
@@ -112,6 +164,24 @@ class LoginViewmodel extends BaseViewmodel
     inputAreAllInputsValid.add(null);
   }
 
+  @override
+  void setRememberMe(bool rememberMe) {
+    _rememberMe = rememberMe;
+    inputRememberMe.add(rememberMe);
+  }
+
+  /// Get current remember me state
+  bool get rememberMe => _rememberMe;
+
+  /// Auto-login with remembered credentials
+  Future<void> autoLoginWithRememberedCredentials() async {
+    final hasRemembered = await _appPreferences.hasRememberedCredentials();
+    if (hasRemembered) {
+      debugPrint('[LoginViewModel] Auto-login with remembered credentials');
+      await login();
+    }
+  }
+
   // Private helper method to check if all inputs are valid
   bool _areAllInputsValid() {
     return isEmailValid(loginObject.email) &&
@@ -122,10 +192,12 @@ class LoginViewmodel extends BaseViewmodel
 abstract class LoginViewmodelInputs {
   void setEmail(String email);
   void setPassword(String password);
+  void setRememberMe(bool rememberMe);
   Future<void> login();
 
   Sink<String> get inputEmail;
   Sink<String> get inputPassword;
+  Sink<bool> get inputRememberMe;
   Sink get inputAreAllInputsValid;
 }
 
@@ -133,4 +205,5 @@ abstract class LoginViewmodelOutputs {
   Stream<bool> get outIsEmailValid;
   Stream<bool> get outIsPasswordValid;
   Stream<bool> get outAreAllInputsValid;
+  Stream<bool> get outRememberMe;
 }

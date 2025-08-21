@@ -31,7 +31,7 @@ abstract class MovieServiceClient {
 
   // Get movie details
   @GET("/movie/{movie_id}")
-  Future<MovieDetailResponse> getMovieDetails(
+  Future<MovieDetailsResponse> getMovieDetails(
       @Path("movie_id") int movieId, @Query("api_key") String apiKey,
       [@Query("language") String? language]);
 

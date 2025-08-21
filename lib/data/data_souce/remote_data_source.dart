@@ -9,13 +9,18 @@ abstract class RemoteDataSource {
   Future<RegisterResponse> register(RegisterRequest registerRequest);
   Future<VerifyEmailResponse> verifyEmail(
       VerifyEmailRequest verifyEmailRequest);
+  Future<AddLikeResponse> addLike(AddLikeRequest addLIkeRequest);
+  Future<SendNotificationResponse> sendNotifications(
+      SendNotificationsRequest sendNotificationsRequest);
+  Future<MovieDetailsResponse> sendPrompt(SendPromptRequest sendPrompt);
+  Future<UserProfileResponse> getUserData();
 
-  // Remove apiKey parameters since it will be handled internally
   Future<MovieListResponse> nowPlaying({int? page, String? language});
   Future<MovieListResponse> topRatedMovies({int? page, String? language});
   Future<MovieListResponse> popularMovies({int? page, String? language});
   Future<MovieListResponse> upcomingMovies({int? page, String? language});
-  Future<MovieDetailResponse> movieDetails(int movieId, {String? language});
+  Future<MovieDetailsResponse> movieDetails(int movieId, {String? language});
+
   Future<MovieListResponse> searchMovies(String query,
       {int? page, String? language});
   Future<MovieListResponse> similarMovies(int movieId,
@@ -48,7 +53,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
     return await _appServiceClient.verifyEmail(verifyEmailRequest.toJson());
   }
 
-  ///////////////////////////////////Movie////////////////////////////////////
+  /////////////////////////////////// Get Movie////////////////////////////////////
   @override
   Future<MovieListResponse> nowPlaying({int? page, String? language}) async {
     return await _movieServiceClient.getNowPlayingMovies(
@@ -62,8 +67,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   }
 
   @override
-  Future<MovieListResponse> popularMovies(
-      {int? page, String? language}) async {
+  Future<MovieListResponse> popularMovies({int? page, String? language}) async {
     return await _movieServiceClient.getPopularMovies(_apiKey, page, language);
   }
 
@@ -74,7 +78,7 @@ class RemoteDataSourceImpl implements RemoteDataSource {
   }
 
   @override
-  Future<MovieDetailResponse> movieDetails(int movieId,
+  Future<MovieDetailsResponse> movieDetails(int movieId,
       {String? language}) async {
     return await _movieServiceClient.getMovieDetails(
         movieId, _apiKey, language);
@@ -99,5 +103,28 @@ class RemoteDataSourceImpl implements RemoteDataSource {
       {int? page, String? language}) async {
     return await _movieServiceClient.getSimilarMovies(
         movieId, _apiKey, page, language);
+  }
+
+////////////////////////////////Movie Operations////////////////////////////////////
+  @override
+  Future<AddLikeResponse> addLike(AddLikeRequest addLIkeRequest) async {
+    return await _appServiceClient.addLike(addLIkeRequest.movieId);
+  }
+
+  @override
+  Future<SendNotificationResponse> sendNotifications(
+      ///////////Send Notification
+      SendNotificationsRequest sendNotificationsRequest) async {
+    return await _appServiceClient.sendNotifications(sendNotificationsRequest);
+  }
+
+  @override
+  Future<MovieDetailsResponse> sendPrompt(SendPromptRequest sendPrompt) async {
+    return await _appServiceClient.sendPrompt(sendPrompt.prompt);
+  }
+  
+  @override
+  Future<UserProfileResponse> getUserData() async{
+    return await _appServiceClient.getUserData();
   }
 }

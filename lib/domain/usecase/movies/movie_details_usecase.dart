@@ -5,15 +5,13 @@ import 'package:ai_movie_suggestion/domain/usecase/base_usecase.dart';
 import 'package:ai_movie_suggestion/presentation/base/base_movie_viewmodel.dart';
 import 'package:dartz/dartz.dart';
 
-class MovieDetailsUseCase
-    implements BaseUseCase<MovieDetailsUseCaseInput, List<MovieDetail>> {
+class MovieDetailsUseCase implements BaseUseCase<MovieDetailsUseCaseInput, MovieDetail> {
   final Repository _repository;
 
   MovieDetailsUseCase(this._repository);
 
   @override
-  Future<Either<Failure, List<MovieDetail>>> execute(
-      MovieDetailsUseCaseInput input) async {
+  Future<Either<Failure, MovieDetail>> execute(MovieDetailsUseCaseInput input) async {
     return await _repository.movieDetails(
       input.movieId,
       language: input.language,

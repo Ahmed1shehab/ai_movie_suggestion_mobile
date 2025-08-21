@@ -43,3 +43,29 @@ class VerifyEmailRequest {
     };
   }
 }
+
+class AddLikeRequest {
+  final String movieId;
+  AddLikeRequest(this.movieId);
+}
+
+class SendNotificationsRequest {
+  String message;
+  String date;
+
+  SendNotificationsRequest(this.message, DateTime dateTime)
+      : date = dateTime.toIso8601String();
+
+  Map<String, dynamic> toJson() => {
+        'message': message,
+        'date': date,
+      };
+}
+
+class SendPromptRequest {
+  String prompt;
+  SendPromptRequest(this.prompt);
+  Map<String, dynamic> toJson() => {
+        'prompt': prompt,
+      };
+}

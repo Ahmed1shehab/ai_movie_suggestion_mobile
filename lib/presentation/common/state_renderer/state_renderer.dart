@@ -13,7 +13,7 @@ enum StateRendererType {
   popLoadingState,
   popErrorState,
   popSuccessState,
-
+  popLoadingInChatState,
   //Full Screen States(Full Screen)
   fullScreenLoadingState,
   fullScreenErrorState,
@@ -23,6 +23,7 @@ enum StateRendererType {
   fullScreenButtonLoadingState
 }
 
+// ignore: must_be_immutable
 class StateRenderer extends StatelessWidget {
   StateRendererType stateRendererType;
   String message;
@@ -76,9 +77,11 @@ class StateRenderer extends StatelessWidget {
       case StateRendererType.fullScreenEmptyState:
         return _getItemsColumn(
             [_getAnimatedImage(JsonAssets.success), _getMessage(message)]);
+      case StateRendererType.popLoadingInChatState:
+        return _getpopDialog(context, [
+          _getAnimatedImage(JsonAssets.loadingDots),
+        ]);
       case StateRendererType.contentState:
-        return Container();
-      default:
         return Container();
     }
   }

@@ -11,7 +11,7 @@ ThemeData getDefaultApplicationTheme() {
     disabledColor: ColorManager.grey,
     splashColor: ColorManager.primary,
     // card view theme
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: ColorManager.white,
       shadowColor: ColorManager.grey,
       elevation: AppSize.s4,

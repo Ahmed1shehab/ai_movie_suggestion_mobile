@@ -1,12 +1,13 @@
 import 'package:ai_movie_suggestion/app/di.dart';
 import 'package:ai_movie_suggestion/presentation/main/pages/discover/discover_view.dart';
 import 'package:ai_movie_suggestion/presentation/main/pages/home/view/home_view.dart';
-import 'package:ai_movie_suggestion/presentation/main/pages/profile/profile_view.dart';
-import 'package:ai_movie_suggestion/presentation/main/pages/suggest_me/suggest_me_view.dart';
+import 'package:ai_movie_suggestion/presentation/main/pages/profile/view/profile_view.dart';
+import 'package:ai_movie_suggestion/presentation/main/pages/suggest_me/view/suggest_me_view.dart';
 import 'package:ai_movie_suggestion/presentation/resources/assets_manager.dart';
 import 'package:ai_movie_suggestion/presentation/resources/color_manager.dart';
 import 'package:ai_movie_suggestion/presentation/resources/string_manager.dart';
 import 'package:ai_movie_suggestion/presentation/resources/values_manager.dart';
+import 'package:ai_movie_suggestion/presentation/send_notifcations/view/send_notifications_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -25,9 +26,11 @@ class _MainViewState extends State<MainView> {
     super.initState();
 
     initTopRatedModule();
-
+    initSendNotificationModule();
+    initSuggestMeModule();
+    initProfileModule();
     pages = [
-      TopRatedView(),
+      const TopRatedView(),
       const SuggestMeView(),
       const DiscoverView(),
       const ProfileView(),

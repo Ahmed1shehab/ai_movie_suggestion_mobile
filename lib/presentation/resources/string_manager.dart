@@ -12,6 +12,7 @@ class AppStrings {
   static const String tryAgain = 'Try Again';
   static const String back = 'Back';
   static const String noDataFound = 'No Data Found';
+  static const String contactMe = 'Contact Me';
 
   ////////////////////////////////////////// Onboarding /////////////////////////////////////////////////
   static const String onBoardingTitle1 = 'Welcome To CineSpark';
@@ -84,4 +85,102 @@ class AppStrings {
   static const String forYou = 'For You';
 
   static const String search = 'Search for movies...';
+  static const String genres = "Genres";
+  static const String overview = "Overview";
+  static const String productionCompanies = "Production Companies";
+  static const String cast = "Cast";
+  static const String crew = "Crew";
+  static const String similarMovies = "Similar Movies";
+  static const String recommendations = "Recommendations";
+  static const String releaseDate = "Release Date";
+  static const String runtime = "Runtime";
+  static const String budget = "Budget";
+  static const String revenue = "Revenue";
+  static const String originalLanguage = "Original Language";
+  static const String status = "Status";
+  static const String homepage = "Homepage";
+  static const String imdbPage = "IMDb Page";
+
+  // Movie Details Strings
+  static const String synopsis = "Synopsis";
+  static const String watchNow = "Watch Now";
+  static const String addToWatchlist = "Add to Watchlist";
+  static const String getNotified = "Get Notified";
+  static const String notificationSubtitle =
+      "Want to be notified when this movie is available to stream?";
+  static const String selectDate = "Select Date";
+  static const String selectTime = "Select Time";
+  static const String notifyMe = "Notify Me";
+  static const String additionalInformation = "Additional Information";
+
+  static const String visitHomepage = "Visit Homepage";
+
+  static const String minutes = "min";
+  static const String rating = "PG-13";
+  static const String year = "year";
+
+  // Error Messages
+  static const String noMovieData = "No movie data available";
+  static const String retry = "Retry";
+  static const String error = "Error";
+  static const String unableToOpenLink = "Unable to open the link";
+  static const String cannotLaunchUrl = "Cannot launch this URL";
+  static const String invalidUrlFormat = "Invalid URL format";
+
+  // Notification Messages
+  static const String notificationSetFor = "Notification set for";
+  static const String at = "at";
+
+  // Default values
+  static String selectedDate = "Select Date";
+  static String selectedTime = "Select Time";
+  static const String invalidUrl = "Invalid URL";
+  static const String openingBrowser = "Opening in browser...";
+  static const String errorLaunchingUrl = "Error launching URL";
+  static const String seeAll = "See All";
+  static const String noMoviesFound = "No movies found";
+  static const String movieDetailsViewInitState =
+      "Movie Details View Init State";
+  static const String inWatchlist = "In Watchlist";
+  static const String notificationSet = "In Watchlist";
+  static const String recommended = "Recommended";
+
+  ///////////////////////Mapper String ////////////////////////////
+  static const String noNotifications = "No notifications";
+  static const String notificationAdded = "Notification added";
+  static const String likeAddedSuccessfully = "Like added successfully";
+  static const String noDataReceived = "No data received";
+  static const String imageNotAvailable = 'Image not available';
+
+/////////////////// Notification Strings ////////////////////////
+  static const String scheduleReminder = "Schedule Reminder";
+  static const String reminderMessage = 'Set a reminder to watch this movie';
+  static const String enterYourMovieReminderMessage =
+      "Enter your movie reminder message...";
+  static const String notificationMessgae = "Notification Message";
+  static const String enable = "Enable";
+  static const String enableNotification =
+      'Enable notifications to receive scheduled movie reminders';
+  static const String notificationsDisabled = 'Notifications Disabled';
+  static const String notificationPermissionRequired =
+      'Notification permissions are required for scheduling notifications';
+
+/////////////////// SuggestMe Strings ////////////////////////
+  static const String whatMovieWouldYouLike = "What movie would you like?";
+  static const String aiPowered = "AI Powered";
+  static const String enterYourPrompt = "I'm in the mood for...";
+  static const String getSuggestion = "Get Suggestion";
+  static const String noMovieSuggestionYet = "No movie suggestion yet";
+  static const String enterPromptToGetSuggestion =
+      "Enter a prompt above to get personalized movie recommendations";
+
+  static const String initialPrompt =
+      "Hi, I'm your movie expert!\n\nTell me what kind of movie you're in the mood for, and I'll suggest something perfect for you.\n\nTry something like:";
+ static const String sciFi = '"Suggest a sci-fi movie with time travel"';
+ static const String comedy =  '"I want a comedy from the 90s"';
+ static const String thriller = '"What\'s a good thriller on Netflix?"';
+ static const String romance = '"Recommend a romantic movie"';
+ static const String action = '"I\'m in the mood for an action movie"';
+ static const String defaultPrompt = '"Here\'s a great movie recommendation for you:"';
+ static const String profileLoadedSuccessfully = 'Profile loaded successfully';
 }

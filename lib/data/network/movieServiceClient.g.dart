@@ -190,7 +190,7 @@ class _MovieServiceClient implements MovieServiceClient {
   }
 
   @override
-  Future<MovieDetailResponse> getMovieDetails(
+  Future<MovieDetailsResponse> getMovieDetails(
     int movieId,
     String apiKey, [
     String? language,
@@ -203,7 +203,7 @@ class _MovieServiceClient implements MovieServiceClient {
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<MovieDetailResponse>(Options(
+    final _options = _setStreamType<MovieDetailsResponse>(Options(
       method: 'GET',
       headers: _headers,
       extra: _extra,
@@ -220,9 +220,9 @@ class _MovieServiceClient implements MovieServiceClient {
           baseUrl,
         )));
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late MovieDetailResponse _value;
+    late MovieDetailsResponse _value;
     try {
-      _value = MovieDetailResponse.fromJson(_result.data!);
+      _value = MovieDetailsResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;

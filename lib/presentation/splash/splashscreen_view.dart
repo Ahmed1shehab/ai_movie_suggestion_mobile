@@ -28,8 +28,52 @@ class _SplashscreenView extends State<SplashscreenView> {
     _timer = Timer(const Duration(seconds: AppConstants.splashDelay), _goNext);
   }
 
-  _goNext() {
-    Navigator.pushReplacementNamed(context, Routes.mainRoute);
+  _goNext() async{
+     Navigator.pushReplacementNamed(context, Routes.onboardingRoute);
+  //  try {
+  //     // First check if onboarding has been viewed
+  //     final isOnBoardingScreenViewed = await _appPreferences.isOnBoardingScreenViewed();
+      
+  //     if (!isOnBoardingScreenViewed) {
+  //       // User hasn't seen onboarding yet, navigate to onboarding
+  //       debugPrint('[SplashScreen] User hasn\'t seen onboarding, navigating to onboarding');
+  //       if (mounted) {
+  //         Navigator.pushReplacementNamed(context, Routes.onboardingRoute);
+  //       }
+  //       return;
+  //     }
+      
+  //     // Check if user is already logged in
+  //     final isUserLoggedIn = await _appPreferences.isUserLoggedIn();
+      
+  //     if (isUserLoggedIn) {
+  //       // Check if user has remember me enabled with valid credentials
+  //       final hasRememberedCredentials = await _appPreferences.hasRememberedCredentials();
+        
+  //       if (hasRememberedCredentials) {
+  //         // User is logged in and has remember me enabled, go directly to main
+  //         debugPrint('[SplashScreen] User has remembered credentials, navigating to main');
+  //         if (mounted) {
+  //           Navigator.pushReplacementNamed(context, Routes.mainRoute);
+  //         }
+  //         return;
+  //       }
+  //     }
+      
+  //     // Default behavior: go to login screen
+  //     debugPrint('[SplashScreen] Navigating to login screen');
+  //     if (mounted) {
+  //       Navigator.pushReplacementNamed(context, Routes.loginRoute);
+  //     }
+  //   } catch (e) {
+  //     debugPrint('[SplashScreen] Error in _goNext: $e');
+  //     // In case of error, navigate to login
+  //     if (mounted) {
+  //       Navigator.pushReplacementNamed(context, Routes.loginRoute);
+  //     }
+  //   }
+    
+    // Alternative logic if you want to check onboarding:
     // _appPreferences.isOnBoardingScreenViewed().then((isOnBoardingScreenViewed) {
     //   if (isOnBoardingScreenViewed) {
     //     //navigate login
@@ -44,7 +88,9 @@ class _SplashscreenView extends State<SplashscreenView> {
   @override
   void initState() {
     super.initState();
-    _startDelay();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _goNext();
+    });
   }
 
   @override

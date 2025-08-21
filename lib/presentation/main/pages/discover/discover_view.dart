@@ -9,8 +9,6 @@ import 'package:ai_movie_suggestion/presentation/resources/string_manager.dart';
 import 'package:ai_movie_suggestion/presentation/resources/values_manager.dart';
 import 'package:flutter/material.dart';
 
-// Add your SizeConfig import here
-// import 'package:ai_movie_suggestion/utils/size_config.dart';
 
 class DiscoverView extends StatefulWidget {
   const DiscoverView({super.key});

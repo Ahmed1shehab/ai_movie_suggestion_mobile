@@ -2,7 +2,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Constants {
   // Base API URLs from .env
-  static String get baseUrl => dotenv.env['ENVBASE_URL'] ?? "";
+ static String get baseUrl => dotenv.env['BASE_URL'] ?? "";
   static String get movieBaseUrl => dotenv.env['MOVIE_BASE_URL'] ?? "";
   static String get apiKey => dotenv.env['API_MOVIE_KEY'] ?? "";
 

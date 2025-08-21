@@ -1,5 +1,7 @@
+import 'package:ai_movie_suggestion/app/di.dart';
 import 'package:ai_movie_suggestion/domain/model/models.dart';
 import 'package:ai_movie_suggestion/presentation/common/utils/size_config.dart';
+import 'package:ai_movie_suggestion/presentation/resources/routes_manager.dart';
 import 'package:flutter/material.dart';
 
 class MovieItemWidget extends StatelessWidget {
@@ -17,7 +19,15 @@ class MovieItemWidget extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          Navigator.pushNamed(context, '/movie-details', arguments: movie);
+         initMovieDetailsModule();
+                    Navigator.pushReplacementNamed(
+                      context,
+                      Routes.movieDetailsRoute,
+                      arguments: MovieDetailsArguments(
+                        movieId: movie.id,
+                        routeName: Routes.mainRoute,
+                      ),
+                    );
         },
         child: ClipRRect(
           borderRadius: BorderRadius.circular(SizeConfig.scaleSize(8)),

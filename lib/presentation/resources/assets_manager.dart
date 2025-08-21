@@ -20,11 +20,13 @@ class ImagesAssets {
   static const String suggestMeIconActive = "${iconsPath}Sparkles_active.png";
   static const String discoverIconActive = "${iconsPath}Compass_active.png";
   static const String profileIconActive = "${iconsPath}User_active.png";
+  static const String meImage = "${imagesPath}me.jpg";
 }
 
 class JsonAssets {
   static const String loading = '${jsonPath}loading.json';
   static const String loading2 = '${jsonPath}loading2.json';
+  static const String loadingDots = '${jsonPath}loadingDots.json';
   static const String success = '${jsonPath}success.json';
   static const String error = '${jsonPath}error.json';
 }

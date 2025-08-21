@@ -3,7 +3,6 @@ import 'package:ai_movie_suggestion/app/di.dart';
 import 'package:ai_movie_suggestion/domain/model/models.dart';
 import 'package:ai_movie_suggestion/presentation/common/state_renderer/state_render_impl.dart';
 import 'package:ai_movie_suggestion/presentation/main/pages/discover/pages/now_playing/viewmodel/now_playing_viewmodel.dart';
-import 'package:ai_movie_suggestion/presentation/main/pages/discover/pages/trending/viewmodel/trending_viewmodel.dart';
 import 'package:ai_movie_suggestion/presentation/main/pages/discover/widgets/movie_grid.dart';
 import 'package:ai_movie_suggestion/presentation/resources/color_manager.dart';
 import 'package:flutter/material.dart';

@@ -34,21 +34,57 @@ class _LoginViewState extends State<LoginView> {
 
   _bind() {
     _viewModel.start();
+    
+    // Listen to text field changes
     _emailController
         .addListener(() => _viewModel.setEmail(_emailController.text));
     _passwordController
         .addListener(() => _viewModel.setPassword(_passwordController.text));
 
-    _viewModel.isUserLoggedInStreamController.stream.listen((isLoggedIn) {
-      debugPrint('[LoginView] Received isLoggedIn = $isLoggedIn');
-      if (isLoggedIn) {
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          debugPrint('[LoginView] Navigating to Main');
-          _appPreferences.setUserLoggedIn();
-          Navigator.of(context).pushReplacementNamed(Routes.mainRoute);
+    // Listen to remember me changes from viewmodel
+    _viewModel.outRememberMe.listen((rememberMe) {
+      if (mounted) {
+        setState(() {
+          _rememberMe = rememberMe;
         });
       }
     });
+
+    // Listen to login success
+    _viewModel.isUserLoggedInStreamController.stream.listen((isLoggedIn) {
+      debugPrint('[LoginView] isUserLoggedInStream value: $isLoggedIn');
+      if (isLoggedIn) {
+        debugPrint('[LoginView] User logged in, navigating to main route');
+        if (mounted) {
+          Navigator.of(context).pushReplacementNamed(Routes.mainRoute);
+        }
+      }
+    });
+
+    // Load and populate remembered credentials
+    _loadRememberedCredentials();
+  }
+
+  Future<void> _loadRememberedCredentials() async {
+    try {
+      final hasRemembered = await _appPreferences.hasRememberedCredentials();
+      if (hasRemembered) {
+        final credentials = await _appPreferences.getRememberedCredentials();
+        final email = credentials['email'] ?? '';
+        final password = credentials['password'] ?? '';
+        
+        setState(() {
+          _emailController.text = email;
+          _passwordController.text = password;
+          _rememberMe = true;
+        });
+        
+        _viewModel.setRememberMe(true);
+        debugPrint('[LoginView] Loaded remembered credentials');
+      }
+    } catch (e) {
+      debugPrint('[LoginView] Error loading remembered credentials: $e');
+    }
   }
 
   @override
@@ -62,6 +98,8 @@ class _LoginViewState extends State<LoginView> {
   void dispose() {
     debugPrint('[LoginView] dispose');
     _viewModel.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -159,6 +197,8 @@ class _LoginViewState extends State<LoginView> {
                                 setState(() {
                                   _rememberMe = value ?? false;
                                 });
+                                _viewModel.setRememberMe(_rememberMe);
+                                debugPrint('[LoginView] Remember me set to: $_rememberMe');
                               },
                             ),
                             const Text(AppStrings.rememberMe),
@@ -211,7 +251,6 @@ class _LoginViewState extends State<LoginView> {
                         );
                       },
                     ),
-                    
 
                     /// OR Divider
                     SizedBox(height: SizeConfig.scaleHeight(AppPadding.p36)),

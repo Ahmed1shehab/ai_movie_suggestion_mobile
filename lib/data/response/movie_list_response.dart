@@ -1,3 +1,4 @@
+import 'package:ai_movie_suggestion/data/convertor/num_convertor.dart';
 import 'package:ai_movie_suggestion/data/response/response.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -108,113 +109,150 @@ class Movie {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
+// movie_details_response.dart
+
 @JsonSerializable()
-class MovieDetailResponse extends BaseResponse {
-  final bool adult;
-  @JsonKey(name: 'backdrop_path')
-  final String? backdropPath;
-  @JsonKey(name: 'belongs_to_collection')
-  final CollectionResponse? belongsToCollection;
-  final int budget;
-  final List<GenreResponse> genres;
-  final String? homepage;
-  final int id;
-  @JsonKey(name: 'imdb_id')
-  final String? imdbId;
-  @JsonKey(name: 'origin_country')
-  final List<String> originCountry;
-  @JsonKey(name: 'original_language')
-  final String originalLanguage;
+class MovieDetailsResponse {
+  @JsonKey(name: 'id')
+  final int? id;
+  
+  @JsonKey(name: 'title')
+  final String? title;
+  
   @JsonKey(name: 'original_title')
-  final String originalTitle;
-  final String overview;
-  final double popularity;
+  final String? originalTitle;
+  
+  @JsonKey(name: 'overview')
+  final String? overview;
+  
   @JsonKey(name: 'poster_path')
   final String? posterPath;
-  @JsonKey(name: 'production_companies')
-  final List<ProductionCompanyResponse> productionCompanies;
-  @JsonKey(name: 'production_countries')
-  final List<ProductionCountryResponse> productionCountries;
+  
+  @JsonKey(name: 'backdrop_path')
+  final String? backdropPath;
+  
+  @JsonKey(name: 'vote_average')
+  final double? voteAverage;
+  
+  @JsonKey(name: 'vote_count')
+  final int? voteCount;
+  
   @JsonKey(name: 'release_date')
   final String? releaseDate;
-  final int revenue;
+  
+  @JsonKey(name: 'runtime')
   final int? runtime;
-  @JsonKey(name: 'spoken_languages')
-  final List<SpokenLanguageResponse> spokenLanguages;
-
+  
+  @JsonKey(name: 'budget')
+  final int? budget;
+  
+  @JsonKey(name: 'revenue')
+  final int? revenue;
+  
+  @JsonKey(name: 'popularity')
+  final double? popularity;
+  
+  @JsonKey(name: 'adult')
+  final bool? adult;
+  
+  @JsonKey(name: 'homepage')
+  final String? homepage;
+  
+  @JsonKey(name: 'imdb_id')
+  final String? imdbId;
+  
+  @JsonKey(name: 'original_language')
+  final String? originalLanguage;
+  
+  @JsonKey(name: 'status')
+  final String? status;
+  
+  @JsonKey(name: 'tagline')
   final String? tagline;
-  final String title;
-  final bool video;
-  @JsonKey(name: 'vote_average')
-  final double voteAverage;
-  @JsonKey(name: 'vote_count')
-  final int voteCount;
+  
+  @JsonKey(name: 'genres')
+  final List<GenreResponse>? genres;
+  
+  @JsonKey(name: 'production_companies')
+  final List<ProductionCompanyResponse>? productionCompanies;
+  
+  @JsonKey(name: 'production_countries')
+  final List<ProductionCountryResponse>? productionCountries;
+  
+  @JsonKey(name: 'spoken_languages')
+  final List<SpokenLanguageResponse>? spokenLanguages;
+  
+  @JsonKey(name: 'belongs_to_collection')
+  final CollectionResponse? collection;
 
-  MovieDetailResponse({
-    required this.adult,
-    this.backdropPath,
-    this.belongsToCollection,
-    required this.budget,
-    required this.genres,
-    this.homepage,
-    required this.id,
-    this.imdbId,
-    required this.originCountry,
-    required this.originalLanguage,
-    required this.originalTitle,
-    required this.overview,
-    required this.popularity,
+  const MovieDetailsResponse({
+    this.id,
+    this.title,
+    this.originalTitle,
+    this.overview,
     this.posterPath,
-    required this.productionCompanies,
-    required this.productionCountries,
+    this.backdropPath,
+    this.voteAverage,
+    this.voteCount,
     this.releaseDate,
-    required this.revenue,
     this.runtime,
-    
-    required this.spokenLanguages,
+    this.budget,
+    this.revenue,
+    this.popularity,
+    this.adult,
+    this.homepage,
+    this.imdbId,
+    this.originalLanguage,
+    this.status,
     this.tagline,
-    required this.title,
-    required this.video,
-    required this.voteAverage,
-    required this.voteCount,
+    this.genres,
+    this.productionCompanies,
+    this.productionCountries,
+    this.spokenLanguages,
+    this.collection,
   });
 
-  factory MovieDetailResponse.fromJson(Map<String, dynamic> json) =>
-      _$MovieDetailResponseFromJson(json);
+  factory MovieDetailsResponse.fromJson(Map<String, dynamic> json) =>
+      _$MovieDetailsResponseFromJson(json);
 
-  Map<String, dynamic> toJson() => _$MovieDetailResponseToJson(this);
-}
+  Map<String, dynamic> toJson() => _$MovieDetailsResponseToJson(this);
 
-@JsonSerializable()
-class CollectionResponse {
-  final int id;
-  final String name;
-  @JsonKey(name: 'poster_path')
-  final String? posterPath;
-  @JsonKey(name: 'backdrop_path')
-  final String? backdropPath;
-
-  CollectionResponse({
-    required this.id,
-    required this.name,
-    this.posterPath,
-    this.backdropPath,
-  });
-
-  factory CollectionResponse.fromJson(Map<String, dynamic> json) =>
-      _$CollectionResponseFromJson(json);
-
-  Map<String, dynamic> toJson() => _$CollectionResponseToJson(this);
+  // Helper methods for full URLs
+  String get fullPosterUrl => posterPath != null 
+      ? 'https://image.tmdb.org/t/p/w500$posterPath' 
+      : '';
+  
+  String get fullBackdropUrl => backdropPath != null 
+      ? 'https://image.tmdb.org/t/p/w780$backdropPath' 
+      : '';
+  
+  DateTime? get releaseDateParsed => releaseDate != null 
+      ? DateTime.tryParse(releaseDate!) 
+      : null;
+  
+  String get year => releaseDateParsed?.year.toString() ?? '';
+  
+  String get displayTitle => title ?? originalTitle ?? '';
+  
+  String get runtimeFormatted {
+    if (runtime == null) return '';
+    final hours = runtime! ~/ 60;
+    final minutes = runtime! % 60;
+    return hours > 0 ? '${hours}h ${minutes}m' : '${minutes}m';
+  }
 }
 
 @JsonSerializable()
 class GenreResponse {
-  final int id;
-  final String name;
+  @JsonKey(name: 'id')
+  final int? id;
+  
+  @JsonKey(name: 'name')
+  final String? name;
 
-  GenreResponse({
-    required this.id,
-    required this.name,
+  const GenreResponse({
+    this.id,
+    this.name,
   });
 
   factory GenreResponse.fromJson(Map<String, dynamic> json) =>
@@ -225,35 +263,46 @@ class GenreResponse {
 
 @JsonSerializable()
 class ProductionCompanyResponse {
-  final int id;
+  @JsonKey(name: 'id')
+  final int? id;
+  
+  @JsonKey(name: 'name')
+  final String? name;
+  
   @JsonKey(name: 'logo_path')
   final String? logoPath;
-  final String name;
+  
   @JsonKey(name: 'origin_country')
-  final String originCountry;
+  final String? originCountry;
 
-  ProductionCompanyResponse({
-    required this.id,
+  const ProductionCompanyResponse({
+    this.id,
+    this.name,
     this.logoPath,
-    required this.name,
-    required this.originCountry,
+    this.originCountry,
   });
 
   factory ProductionCompanyResponse.fromJson(Map<String, dynamic> json) =>
       _$ProductionCompanyResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$ProductionCompanyResponseToJson(this);
+  
+  String get fullLogoUrl => logoPath != null 
+      ? 'https://image.tmdb.org/t/p/w154$logoPath' 
+      : '';
 }
 
 @JsonSerializable()
 class ProductionCountryResponse {
   @JsonKey(name: 'iso_3166_1')
-  final String iso31661;
-  final String name;
+  final String? iso31661;
+  
+  @JsonKey(name: 'name')
+  final String? name;
 
-  ProductionCountryResponse({
-    required this.iso31661,
-    required this.name,
+  const ProductionCountryResponse({
+    this.iso31661,
+    this.name,
   });
 
   factory ProductionCountryResponse.fromJson(Map<String, dynamic> json) =>
@@ -265,19 +314,57 @@ class ProductionCountryResponse {
 @JsonSerializable()
 class SpokenLanguageResponse {
   @JsonKey(name: 'english_name')
-  final String englishName;
+  final String? englishName;
+  
   @JsonKey(name: 'iso_639_1')
-  final String iso6391;
-  final String name;
+  final String? iso6391;
+  
+  @JsonKey(name: 'name')
+  final String? name;
 
-  SpokenLanguageResponse({
-    required this.englishName,
-    required this.iso6391,
-    required this.name,
+  const SpokenLanguageResponse({
+    this.englishName,
+    this.iso6391,
+    this.name,
   });
 
   factory SpokenLanguageResponse.fromJson(Map<String, dynamic> json) =>
       _$SpokenLanguageResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$SpokenLanguageResponseToJson(this);
+}
+
+@JsonSerializable()
+class CollectionResponse {
+  @JsonKey(name: 'id')
+  final int? id;
+  
+  @JsonKey(name: 'name')
+  final String? name;
+  
+  @JsonKey(name: 'poster_path')
+  final String? posterPath;
+  
+  @JsonKey(name: 'backdrop_path')
+  final String? backdropPath;
+
+  const CollectionResponse({
+    this.id,
+    this.name,
+    this.posterPath,
+    this.backdropPath,
+  });
+
+  factory CollectionResponse.fromJson(Map<String, dynamic> json) =>
+      _$CollectionResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CollectionResponseToJson(this);
+  
+  String get fullPosterUrl => posterPath != null 
+      ? 'https://image.tmdb.org/t/p/w342$posterPath' 
+      : '';
+  
+  String get fullBackdropUrl => backdropPath != null 
+      ? 'https://image.tmdb.org/t/p/w780$backdropPath' 
+      : '';
 }

@@ -74,6 +74,17 @@ class SuccessState extends FlowState {
   StateRendererType getStateRendererType() => StateRendererType.popSuccessState;
 }
 
+class LoadingChatState extends FlowState {
+  LoadingChatState();
+
+  @override
+  String getMessage() => Constants.empty;
+
+  @override
+  StateRendererType getStateRendererType() =>
+      StateRendererType.popLoadingInChatState;
+}
+
 extension FlowStateExtension on FlowState {
   Widget getScreenWidget(BuildContext context, Widget contentScreenWidget,
       Function retryActionFunction) {
@@ -92,6 +103,12 @@ extension FlowStateExtension on FlowState {
                 stateRendererType: getStateRendererType(),
                 retryActionFunction: retryActionFunction);
           }
+        }
+      case LoadingChatState: // Added case for LoadingChatState
+        {
+          dismissDialog(context);
+          showPopup(context, getStateRendererType(), getMessage());
+          return contentScreenWidget;
         }
       case ErrorState:
         {

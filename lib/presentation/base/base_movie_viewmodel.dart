@@ -32,12 +32,14 @@ abstract class BaseMovieViewModel extends BaseViewmodel
   // -- Inputs --
   @override
   void start() {
-    _loadMovies();
+    if (!_isDisposed) {
+      _loadMovies();
+    }
   }
 
   @override
   void loadMore() {
-    if (!_isLoading) {
+    if (!_isLoading && !_isDisposed) {
       _currentPage++;
       _loadMovies();
     }
@@ -45,14 +47,18 @@ abstract class BaseMovieViewModel extends BaseViewmodel
 
   @override
   void refresh() {
-    _currentPage = 1;
-    _loadMovies(refresh: true);
+    if (!_isDisposed) {
+      _currentPage = 1;
+      _loadMovies(refresh: true);
+    }
   }
 
   // Abstract method to create input - each child implements their specific input type
   BaseMovieUseCaseInput createUseCaseInput(int page);
 
   Future<void> _loadMovies({bool refresh = false}) async {
+    if (_isDisposed) return;
+    
     _isLoading = true;
 
     if (refresh || _currentPage == 1) {
@@ -119,52 +125,4 @@ abstract class BaseMovieViewModelInput {
 abstract class BaseMovieViewModelOutput {
   Stream<List<MovieEntity>> get outputMovies;
   Stream<bool> get outputIsLoading;
-}
-
-
-// Base view model for movie details
-
-abstract class BaseDetailsViewModel<T> extends BaseViewmodel {
-  final _dataStreamController = BehaviorSubject<T?>();
-  bool _isLoading = false;
-  bool _isDisposed = false;
-
-  Future<Either<Failure, T>> executeUseCase(BaseMovieUseCaseInput input);
-
-  @override
-  void dispose() {
-    _isDisposed = true;
-    _dataStreamController.close();
-    super.dispose();
-  }
-
-  Sink get _inputData => _dataStreamController.sink;
-
-  Stream<T?> get outputData => _dataStreamController.stream;
-
-  Stream<bool> get outputIsLoading => outputData.map((_) => _isLoading);
-
-  Future<void> loadData(BaseMovieUseCaseInput input) async {
-    _isLoading = true;
-    inputState.add(LoadingState(
-      stateRendererType: StateRendererType.fullScreenLoadingState,
-    ));
-
-    final result = await executeUseCase(input);
-
-    if (_isDisposed) return;
-
-    result.fold(
-      (failure) {
-        inputState.add(ErrorState(
-            StateRendererType.fullScreenErrorState, failure.message));
-      },
-      (data) {
-        _inputData.add(data);
-        inputState.add(ContentState());
-      },
-    );
-
-    _isLoading = false;
-  }
 }

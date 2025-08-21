@@ -9,13 +9,14 @@ abstract class Repository {
       RegisterRequest registerRequest);
   Future<Either<Failure, VerifyEmailModel>> verifyEmail(
       VerifyEmailRequest verifyEmailRequest);
+  Future<Either<Failure, AddLikeModel>> addLike(AddLikeRequest addLIkeRequest);
+  Future<Either<Failure, SendNotificationEntity>> sendNotifications(
+      SendNotificationsRequest sendNotificationsRequest);
+  Future<Either<Failure, MovieDetail>> sendPrompt(
+      SendPromptRequest sendPrompt);
+  Future<Either<Failure, UserProfileModel>> getUserData(
+      );
 
-
-
-
-
-
-      
   // Movie methods
   Future<Either<Failure, List<MovieEntity>>> nowPlaying(
       {int? page, String? language});
@@ -25,7 +26,7 @@ abstract class Repository {
       {int? page, String? language});
   Future<Either<Failure, List<MovieEntity>>> upcomingMovies(
       {int? page, String? language});
-  Future<Either<Failure, List<MovieDetail>>> movieDetails(int movieId,
+  Future<Either<Failure, MovieDetail>> movieDetails(int movieId,
       {String? language});
   Future<Either<Failure, List<MovieEntity>>> searchMovies(String query,
       {int? page, String? language});

@@ -5,8 +5,14 @@ import 'package:rxdart/rxdart.dart';
 
 abstract class BaseViewmodel extends BaseViewmodelInputs
     implements BaseViewmodelOutputs {
-// shared variables and function that will be used through any view model.
+  // shared variables and function that will be used through any view model.
   final StreamController _inputStreamController = BehaviorSubject<FlowState>();
+
+  // Add this private flag to track disposal status
+  bool _isDisposed = false;
+
+  // Public getter to check if the ViewModel has been disposed
+  bool get isDisposed => _isDisposed; // <--- Added isDisposed getter
 
   @override
   Sink get inputState => _inputStreamController.sink;
@@ -18,6 +24,7 @@ abstract class BaseViewmodel extends BaseViewmodelInputs
   @override
   void dispose() {
     _inputStreamController.close();
+    _isDisposed = true; // <--- Set the flag to true on dispose
   }
 }
 
