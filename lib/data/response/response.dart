@@ -72,7 +72,9 @@ class VerifyEmailResponse extends BaseResponse {
 ///////////////////////////////////////ADD Like response/////////////////////////////////////////
 @JsonSerializable()
 class AddLikeResponse extends BaseResponse {
-  AddLikeResponse({required String message});
+  AddLikeResponse({String? message}) {
+    this.message = message;
+  }
 
   factory AddLikeResponse.fromJson(Map<String, dynamic> json) =>
       _$AddLikeResponseFromJson(json);

@@ -39,6 +39,7 @@ class WatchlistViewModel extends BaseViewmodel
 
   @override
   void start() {
+    debugPrint('🎬 WatchlistViewModel started');
     loadLikedMovies();
   }
 
@@ -52,15 +53,17 @@ class WatchlistViewModel extends BaseViewmodel
 
   @override
   Future<void> loadLikedMovies() async {
-    // ... (rest of the loadLikedMovies method is unchanged)
+    debugPrint('📋 WatchlistViewModel: Starting to load liked movies...');
     if (!_loadingStreamController.isClosed) {
       inputIsLoading.add(true);
     }
 
     try {
       final List<int> likedMovieIds = await _appPreferences.getLikedMovieIds();
-      
+      debugPrint('📊 Found ${likedMovieIds.length} liked movie IDs: $likedMovieIds');
+
       if (likedMovieIds.isEmpty) {
+        debugPrint('📭 No liked movies found');
         if (!_likedMoviesStreamController.isClosed) {
           inputLikedMovies.add([]);
         }
@@ -69,34 +72,39 @@ class WatchlistViewModel extends BaseViewmodel
       }
 
       List<MovieDetail> likedMovies = [];
-      
+
       for (int movieId in likedMovieIds) {
         try {
+          debugPrint('🎬 Fetching details for movie ID: $movieId');
           final result = await _movieDetailsUseCase.execute(
             MovieDetailsUseCaseInput(movieId),
           );
-          
+
           result.fold(
             (failure) {
-              debugPrint('Failed to load movie $movieId: ${failure.message}');
+              debugPrint('❌ Failed to load movie $movieId: ${failure.message}');
             },
             (movieDetail) {
+              debugPrint('✅ Successfully loaded movie: ${movieDetail.title} (ID: $movieId)');
               likedMovies.add(movieDetail);
             },
           );
         } catch (e) {
-          debugPrint('Error loading movie $movieId: $e');
+          debugPrint('❌ Error loading movie $movieId: $e');
         }
       }
+
+      debugPrint('✅ Successfully loaded ${likedMovies.length} out of ${likedMovieIds.length} liked movies');
 
       if (!_likedMoviesStreamController.isClosed) {
         inputLikedMovies.add(likedMovies);
       }
-      
+
       inputState.add(ContentState());
 
-    } catch (e) {
-      debugPrint('Error in loadLikedMovies: $e');
+    } catch (e, stackTrace) {
+      debugPrint('❌ Error in loadLikedMovies: $e');
+      debugPrint('Stack trace: $stackTrace');
       _showErrorMessage('Failed to load watchlist: $e');
       inputState.add(ErrorState(StateRendererType.fullScreenErrorState, e.toString()));
     } finally {

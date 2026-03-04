@@ -75,25 +75,41 @@ class _SuggestMeViewState extends State<SuggestMeView> {
             padding: EdgeInsets.symmetric(
                 horizontal: SizeConfig.scaleWidth(AppPadding.p16)),
             child: Container(
-              height: SizeConfig.scaleHeight(AppSize.s30),
-              padding: const EdgeInsets.symmetric(horizontal: AppPadding.p20),
+              height: SizeConfig.scaleHeight(AppSize.s34),
+              padding: const EdgeInsets.symmetric(horizontal: AppPadding.p16, vertical: AppPadding.p6),
               decoration: BoxDecoration(
-                color: ColorManager.aiBG,
+                gradient: LinearGradient(
+                  colors: [
+                    ColorManager.primary.withOpacity(0.15),
+                    ColorManager.primary.withOpacity(0.08),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 borderRadius: BorderRadius.circular(AppSize.s20),
+                border: Border.all(
+                  color: ColorManager.primary.withOpacity(0.3),
+                  width: 1,
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.smart_toy,
-                    color: ColorManager.aiText,
+                  ClipOval(
+                    child: Image.asset(
+                      ImagesAssets.appLogo,
+                      height: AppSize.s20,
+                      width: AppSize.s20,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   const SizedBox(width: AppSize.s8),
                   Text(
                     AppStrings.aiPowered,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: ColorManager.aiText,
+                          color: ColorManager.primary,
                           fontWeight: FontWeight.w600,
+                          fontSize: FontSize.s13,
                         ),
                   ),
                 ],
@@ -104,13 +120,13 @@ class _SuggestMeViewState extends State<SuggestMeView> {
         title: Text(
           AppStrings.suggestMe,
           style: Theme.of(context).textTheme.headlineLarge!.copyWith(
-                color: ColorManager.black,
+                color: ColorManager.white,
               ),
         ),
-        backgroundColor: ColorManager.white,
+        backgroundColor: ColorManager.background,
         elevation: AppSize.s0,
       ),
-      backgroundColor: ColorManager.white,
+      backgroundColor: ColorManager.background,
       body: StreamBuilder<FlowState>(
         stream: _viewModel.outputState,
         builder: (context, snapshot) {
@@ -121,14 +137,21 @@ class _SuggestMeViewState extends State<SuggestMeView> {
   }
 
   Widget _getContentWidget() {
-    return Column(
-      children: [
-        // Chat messages
-        Expanded(
-          child: _getChatSection(),
-        ),
-        _getPromptInputSection(),
-      ],
+    return GestureDetector(
+      onTap: () {
+        // Dismiss keyboard when tapping outside the text field
+        FocusScope.of(context).unfocus();
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        children: [
+          // Chat messages
+          Expanded(
+            child: _getChatSection(),
+          ),
+          _getPromptInputSection(),
+        ],
+      ),
     );
   }
 
@@ -216,58 +239,104 @@ class _SuggestMeViewState extends State<SuggestMeView> {
 
   Widget _getChatBubble(ChatMessage message) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppPadding.p4),
+      padding: const EdgeInsets.symmetric(vertical: AppPadding.p8),
       child: Row(
         mainAxisAlignment:
             message.isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!message.isUser) ...[
-            CircleAvatar(
-              radius: AppSize.s16,
-              backgroundColor: message.isError ?? false
-                  ? ColorManager.error
-                  : ColorManager.aiBG,
-              child: Icon(
-                message.isError ?? false
-                    ? Icons.error_outline
-                    : Icons.smart_toy,
+            Container(
+              width: AppSize.s36,
+              height: AppSize.s36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
                 color: message.isError ?? false
-                    ? ColorManager.error
-                    : ColorManager.aiText,
-                size: AppSize.s18,
+                    ? ColorManager.error.withOpacity(0.15)
+                    : ColorManager.white,
+                border: Border.all(
+                  color: message.isError ?? false
+                      ? ColorManager.error
+                      : ColorManager.primary.withOpacity(0.3),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: (message.isError ?? false
+                            ? ColorManager.error
+                            : ColorManager.primary)
+                        .withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
+              child: message.isError ?? false
+                  ? Icon(
+                      Icons.error_outline,
+                      color: ColorManager.error,
+                      size: AppSize.s20,
+                    )
+                  : ClipOval(
+                      child: Image.asset(
+                        ImagesAssets.appLogo,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
             ),
-            const SizedBox(width: AppSize.s8),
+            const SizedBox(width: AppSize.s10),
           ],
           Flexible(
             child: Container(
               constraints: BoxConstraints(
                 maxWidth: MediaQuery.of(context).size.width * 0.75,
               ),
-              padding: const EdgeInsets.all(AppPadding.p12),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppPadding.p14,
+                vertical: AppPadding.p12,
+              ),
               decoration: BoxDecoration(
                 color: message.isUser
                     ? ColorManager.primary
                     : (message.isError ?? false)
-                        ? ColorManager.error
-                        : Colors.transparent,
+                        ? ColorManager.error.withOpacity(0.15)
+                        : ColorManager.secondaryBlack,
                 borderRadius: message.isUser
                     ? const BorderRadius.only(
-                        topLeft: Radius.circular(AppSize.s16),
-                        topRight: Radius.circular(AppSize.s16),
-                        bottomLeft: Radius.circular(AppSize.s16),
+                        topLeft: Radius.circular(AppSize.s18),
+                        topRight: Radius.circular(AppSize.s18),
+                        bottomLeft: Radius.circular(AppSize.s18),
                         bottomRight: Radius.circular(AppSize.s4),
                       )
-                    : (message.isError ?? false)
-                        ? BorderRadius.circular(AppSize.s12)
-                        : null, // No border radius for normal bot messages
-                border: (message.isError ?? false) && !message.isUser
-                    ? Border.all(
-                        color: ColorManager.error,
+                    : const BorderRadius.only(
+                        topLeft: Radius.circular(AppSize.s4),
+                        topRight: Radius.circular(AppSize.s18),
+                        bottomLeft: Radius.circular(AppSize.s18),
+                        bottomRight: Radius.circular(AppSize.s18),
+                      ),
+                border: message.isUser
+                    ? null
+                    : Border.all(
+                        color: (message.isError ?? false)
+                            ? ColorManager.error.withOpacity(0.3)
+                            : ColorManager.greyfield.withOpacity(0.2),
                         width: 1,
-                      )
-                    : null,
+                      ),
+                boxShadow: message.isUser
+                    ? [
+                        BoxShadow(
+                          color: ColorManager.primary.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,7 +348,7 @@ class _SuggestMeViewState extends State<SuggestMeView> {
                           ? ColorManager.white
                           : (message.isError ?? false)
                               ? ColorManager.error
-                              : ColorManager.black,
+                              : ColorManager.white,
                       fontSize: FontSize.s14,
                     ),
                   ),
@@ -292,8 +361,8 @@ class _SuggestMeViewState extends State<SuggestMeView> {
                     _formatTime(message.timestamp),
                     style: getRegularStyle(
                       color: message.isUser
-                          ? ColorManager.white
-                          : ColorManager.greyfield,
+                          ? ColorManager.white.withOpacity(0.8)
+                          : ColorManager.grey,
                       fontSize: FontSize.s10,
                     ),
                   ),
@@ -302,14 +371,32 @@ class _SuggestMeViewState extends State<SuggestMeView> {
             ),
           ),
           if (message.isUser) ...[
-            const SizedBox(width: AppSize.s8),
-            CircleAvatar(
-              radius: AppSize.s16,
-              backgroundColor: ColorManager.primary,
+            const SizedBox(width: AppSize.s10),
+            Container(
+              width: AppSize.s36,
+              height: AppSize.s36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [
+                    ColorManager.primary,
+                    ColorManager.primary.withOpacity(0.8),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: ColorManager.primary.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
               child: Icon(
                 Icons.person,
-                color: ColorManager.primary,
-                size: AppSize.s18,
+                color: ColorManager.white,
+                size: AppSize.s20,
               ),
             ),
           ],
@@ -320,30 +407,68 @@ class _SuggestMeViewState extends State<SuggestMeView> {
 
   Widget _getThinkingBubble() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppPadding.p4),
+      padding: const EdgeInsets.symmetric(vertical: AppPadding.p8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: AppSize.s16,
-            backgroundColor: ColorManager.aiBG,
-            child: Icon(
-              Icons.smart_toy,
-              color: ColorManager.aiText,
-              size: AppSize.s18,
+          Container(
+            width: AppSize.s36,
+            height: AppSize.s36,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: ColorManager.white,
+              border: Border.all(
+                color: ColorManager.primary.withOpacity(0.3),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: ColorManager.primary.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ClipOval(
+              child: Image.asset(
+                ImagesAssets.appLogo,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-          const SizedBox(width: AppSize.s8),
+          const SizedBox(width: AppSize.s10),
           Align(
             alignment: Alignment.centerLeft,
             child: Container(
-              padding: const EdgeInsets.all(AppPadding.p16),
-              decoration: const BoxDecoration(),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppPadding.p14,
+                vertical: AppPadding.p8,
+              ),
+              decoration: BoxDecoration(
+                color: ColorManager.secondaryBlack,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(AppSize.s4),
+                  topRight: Radius.circular(AppSize.s18),
+                  bottomLeft: Radius.circular(AppSize.s18),
+                  bottomRight: Radius.circular(AppSize.s18),
+                ),
+                border: Border.all(
+                  color: ColorManager.greyfield.withOpacity(0.2),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
               child: Lottie.asset(
                 JsonAssets.loadingDots,
-                width: AppSize.s200,
-                height: AppSize.s300,
+                width: AppSize.s60,
+                height: AppSize.s30,
                 fit: BoxFit.contain,
               ),
             ),
@@ -354,30 +479,85 @@ class _SuggestMeViewState extends State<SuggestMeView> {
   }
 
   Widget _getInitialPromptAndSuggestions() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppPadding.p16),
-      padding: const EdgeInsets.all(AppPadding.p16),
-      decoration: BoxDecoration(
-        color: ColorManager.aiBG, 
-        borderRadius: BorderRadius.circular(AppSize.s16),
-      ),
-      child: Column(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppPadding.p8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            AppStrings.initialPrompt,
-            style: getRegularStyle(
-              color: ColorManager.black,
-              fontSize: FontSize.s14,
+          Container(
+            width: AppSize.s36,
+            height: AppSize.s36,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: ColorManager.white,
+              border: Border.all(
+                color: ColorManager.primary.withOpacity(0.3),
+                width: 2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: ColorManager.primary.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ClipOval(
+              child: Image.asset(
+                ImagesAssets.appLogo,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
-          const SizedBox(height: AppSize.s12),
-          Wrap(
-            spacing: AppSize.s8,
-            runSpacing: AppSize.s8,
-            children: _quickSuggestions
-                .map((suggestion) => _getQuickSuggestionChip(suggestion))
-                .toList(),
+          const SizedBox(width: AppSize.s10),
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppPadding.p14,
+                vertical: AppPadding.p14,
+              ),
+              decoration: BoxDecoration(
+                color: ColorManager.secondaryBlack,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(AppSize.s4),
+                  topRight: Radius.circular(AppSize.s18),
+                  bottomLeft: Radius.circular(AppSize.s18),
+                  bottomRight: Radius.circular(AppSize.s18),
+                ),
+                border: Border.all(
+                  color: ColorManager.greyfield.withOpacity(0.2),
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppStrings.initialPrompt,
+                    style: getRegularStyle(
+                      color: ColorManager.white,
+                      fontSize: FontSize.s14,
+                    ),
+                  ),
+                  const SizedBox(height: AppSize.s12),
+                  Wrap(
+                    spacing: AppSize.s8,
+                    runSpacing: AppSize.s8,
+                    children: _quickSuggestions
+                        .map((suggestion) => _getQuickSuggestionChip(suggestion))
+                        .toList(),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -389,18 +569,36 @@ class _SuggestMeViewState extends State<SuggestMeView> {
       onTap: () => _sendQuickSuggestion(suggestion),
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppPadding.p12,
+          horizontal: AppPadding.p14,
           vertical: AppPadding.p8,
         ),
         decoration: BoxDecoration(
-          color: ColorManager.white, // Changed background color
+          gradient: LinearGradient(
+            colors: [
+              ColorManager.primary.withOpacity(0.2),
+              ColorManager.primary.withOpacity(0.1),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(AppSize.s20),
+          border: Border.all(
+            color: ColorManager.primary.withOpacity(0.4),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: ColorManager.primary.withOpacity(0.2),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Text(
           suggestion,
-          style: getRegularStyle(
-            color: ColorManager.buttonForChat,
-            fontSize: FontSize.s12,
+          style: getMediumStyle(
+            color: ColorManager.white,
+            fontSize: FontSize.s13,
           ),
         ),
       ),
@@ -636,57 +834,104 @@ class _SuggestMeViewState extends State<SuggestMeView> {
 
   Widget _getPromptInputSection() {
     return Container(
-      padding: const EdgeInsets.all(AppPadding.p16),
-      decoration: BoxDecoration(
-        color: ColorManager.white,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppPadding.p16,
+        vertical: AppPadding.p12,
       ),
-      child: TextFormField(
-        controller: _promptController,
-        focusNode: _promptFocusNode,
-        decoration: InputDecoration(
-          hintText: AppStrings.enterYourPrompt,
-          hintStyle: Theme.of(context).textTheme.bodySmall!.copyWith(
-                color: ColorManager.greyfield,
-              ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSize.s25),
-            borderSide: BorderSide(
-              color: ColorManager.greyfield,
-              width: 0.5, // Made border thinner
+      decoration: BoxDecoration(
+        color: ColorManager.secondaryBlack,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: ColorManager.white,
+          borderRadius: BorderRadius.circular(AppSize.s28),
+          border: Border.all(
+            color: ColorManager.greyfield.withOpacity(0.3),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSize.s25),
-            borderSide: BorderSide(
-              color: ColorManager.primary,
-              width: 0.5, // Made border thinner
-            ),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSize.s25),
-            borderSide: BorderSide(
-              color: ColorManager.greyfield,
-              width: 0.5, // Made border thinner
-            ),
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: AppPadding.p16,
-            vertical: AppPadding.p12,
-          ),
-          filled: true,
-          fillColor: ColorManager.buttonWhite,
-          suffixIcon: IconButton(
-            icon: Icon(
-              Icons.send,
-              color: ColorManager.buttonForChat,
-              size: AppSize.s20,
-            ),
-            onPressed: _sendPrompt,
-          ),
+          ],
         ),
-        maxLines: 1,
-        textInputAction: TextInputAction.send,
-        onFieldSubmitted: (value) => _sendPrompt(),
+        child: TextFormField(
+          controller: _promptController,
+          focusNode: _promptFocusNode,
+          style: TextStyle(
+            color: ColorManager.black,
+            fontSize: FontSize.s14,
+          ),
+          decoration: InputDecoration(
+            hintText: AppStrings.enterYourPrompt,
+            hintStyle: Theme.of(context).textTheme.bodySmall!.copyWith(
+                  color: ColorManager.greyfield,
+                  fontSize: FontSize.s14,
+                ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSize.s28),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSize.s28),
+              borderSide: BorderSide(
+                color: ColorManager.primary.withOpacity(0.5),
+                width: 2,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSize.s28),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppPadding.p20,
+              vertical: AppPadding.p14,
+            ),
+            filled: true,
+            fillColor: ColorManager.white,
+            suffixIcon: Container(
+              margin: const EdgeInsets.all(AppPadding.p6),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    ColorManager.primary,
+                    ColorManager.primary.withOpacity(0.8),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: ColorManager.primary.withOpacity(0.4),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: IconButton(
+                icon: Icon(
+                  Icons.send_rounded,
+                  color: ColorManager.white,
+                  size: AppSize.s20,
+                ),
+                onPressed: _sendPrompt,
+              ),
+            ),
+          ),
+          maxLines: 1,
+          textInputAction: TextInputAction.send,
+          onFieldSubmitted: (value) => _sendPrompt(),
+        ),
       ),
     );
   }

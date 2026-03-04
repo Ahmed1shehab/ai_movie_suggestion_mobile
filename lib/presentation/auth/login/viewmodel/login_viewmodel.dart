@@ -7,6 +7,7 @@ import 'package:ai_movie_suggestion/presentation/common/freezed_data_classes.dar
 import 'package:ai_movie_suggestion/presentation/common/state_renderer/state_render_impl.dart';
 import 'package:ai_movie_suggestion/presentation/common/state_renderer/state_renderer.dart';
 import 'package:flutter/foundation.dart';
+import 'package:rxdart/rxdart.dart';
 
 class LoginViewmodel extends BaseViewmodel
     implements LoginViewmodelInputs, LoginViewmodelOutputs {
@@ -144,11 +145,15 @@ class LoginViewmodel extends BaseViewmodel
 
   @override
   Stream<bool> get outIsEmailValid =>
-      _emailStreamController.stream.map((email) => isEmailValid(email));
+      _emailStreamController.stream
+          .debounceTime(const Duration(milliseconds: 500))
+          .map((email) => isEmailValid(email));
 
   @override
-  Stream<bool> get outIsPasswordValid => _passwordStreamController.stream
-      .map((password) => isPasswordValid(password));
+  Stream<bool> get outIsPasswordValid =>
+      _passwordStreamController.stream
+          .debounceTime(const Duration(milliseconds: 500))
+          .map((password) => isPasswordValid(password));
 
   @override
   void setEmail(String email) {

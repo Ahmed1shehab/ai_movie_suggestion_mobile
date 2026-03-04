@@ -71,7 +71,7 @@ Map<String, dynamic> _$VerifyEmailResponseToJson(
 
 AddLikeResponse _$AddLikeResponseFromJson(Map<String, dynamic> json) =>
     AddLikeResponse(
-      message: json['message'] as String,
+      message: json['message'] as String?,
     )..statusCode = (json['status'] as num?)?.toInt();
 
 Map<String, dynamic> _$AddLikeResponseToJson(AddLikeResponse instance) =>

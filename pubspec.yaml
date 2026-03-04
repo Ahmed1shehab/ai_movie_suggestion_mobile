@@ -88,6 +88,7 @@ flutter:
     - assets/images/icons/Sparkles_active.png
     - assets/images/icons/Compass_active.png
     - assets/images/icons/User_active.png
+    - assets/AppIcons/icon.png
   
   fonts:
     - family: Inter

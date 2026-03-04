@@ -118,283 +118,236 @@ class _LoginViewState extends State<LoginView> {
     return Scaffold(
       backgroundColor: ColorManager.white,
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: SizeConfig.scaleWidth(AppPadding.p28),
-                  ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p40)),
-                        
-                        // Logo with modern styling
-                        Center(
-                          child: Container(
-                            padding: EdgeInsets.all(SizeConfig.scaleSize(AppPadding.p16)),
-                            decoration: BoxDecoration(
-                              color: ColorManager.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(SizeConfig.scaleSize(AppSize.s24)),
-                            ),
-                            child: Image.asset(
-                              ImagesAssets.appLogo,
-                              height: SizeConfig.scaleHeight(AppSize.s80),
-                              width: SizeConfig.scaleWidth(AppSize.s80),
-                            ),
-                          ),
-                        ),
-                        
-                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p36)),
-                        
-                        // Welcome text with better hierarchy
-                        Text(
-                          AppStrings.welcomeBack,
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            fontSize: SizeConfig.scaleText(FontSize.s28),
-                            fontWeight: FontWeightManager.bold,
-                          ),
-                        ),
-                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p8)),
-                        Text(
-                          AppStrings.signToContinue,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontSize: SizeConfig.scaleText(FontSize.s15),
-                            color: ColorManager.grey,
-                          ),
-                        ),
-                        
-                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p40)),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: SizeConfig.scaleWidth(AppPadding.p28),
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: SizeConfig.scaleHeight(AppPadding.p32)),
 
-                        // Email Field
-                        authBuildTextField(
-                          controller: _emailController,
-                          labelText: AppStrings.email,
-                          hintText: AppStrings.enterYourEmail,
-                          keyboardType: TextInputType.emailAddress,
-                          validationStream: _viewModel.outIsEmailValid,
-                        ),
-                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p20)),
-
-                        // Password Field
-                        authBuildTextField(
-                          controller: _passwordController,
-                          labelText: AppStrings.password,
-                          hintText: AppStrings.enterYourPassword,
-                          keyboardType: TextInputType.visiblePassword,
-                          obscureText: true,
-                          validationStream: _viewModel.outIsPasswordValid,
-                        ),
-                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p16)),
-
-                        // Remember Me + Forgot Password with improved layout
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                SizedBox(
-                                  height: SizeConfig.scaleHeight(AppSize.s24),
-                                  width: SizeConfig.scaleWidth(AppSize.s24),
-                                  child: Checkbox(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                        SizeConfig.scaleSize(AppSize.s6),
-                                      ),
-                                    ),
-                                    side: BorderSide(
-                                      width: SizeConfig.scaleWidth(AppSize.s1_5),
-                                      color: ColorManager.greyfield,
-                                    ),
-                                    value: _rememberMe,
-                                    activeColor: ColorManager.primary,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _rememberMe = value ?? false;
-                                      });
-                                      _viewModel.setRememberMe(_rememberMe);
-                                      debugPrint('[LoginView] Remember me set to: $_rememberMe');
-                                    },
-                                  ),
-                                ),
-                                SizedBox(width: SizeConfig.scaleWidth(AppSize.s8)),
-                                Text(
-                                  AppStrings.rememberMe,
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    fontSize: SizeConfig.scaleText(FontSize.s14),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  Routes.forgetPasswordRoute,
-                                );
-                              },
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: SizeConfig.scaleWidth(AppPadding.p8),
-                                  vertical: SizeConfig.scaleHeight(AppPadding.p4),
-                                ),
-                              ),
-                              child: Text(
-                                AppStrings.forgotPasswrod,
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: ColorManager.primary,
-                                  fontWeight: FontWeightManager.medium,
-                                  fontSize: SizeConfig.scaleText(FontSize.s14),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        
-                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p28)),
-
-                        // Sign In Button with improved design
-                        StreamBuilder<bool>(
-                          stream: _viewModel.outIsLoading,
-                          initialData: false,
-                          builder: (context, snapshot) {
-                            final isLoading = snapshot.data ?? false;
-
-                            return Container(
-                              width: double.infinity,
-                              height: SizeConfig.scaleHeight(AppHeight.h56),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                  SizeConfig.scaleSize(AppSize.s12),
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: ColorManager.primary.withOpacity(0.3),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                ],
-                              ),
-                              child: ElevatedButton(
-                                onPressed: isLoading
-                                    ? null
-                                    : () {
-                                        if (_formKey.currentState?.validate() ?? false) {
-                                          _viewModel.login();
-                                        }
-                                      },
-                                style: ElevatedButton.styleFrom(
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      SizeConfig.scaleSize(AppSize.s12),
-                                    ),
-                                  ),
-                                ),
-                                child: isLoading
-                                    ? SizedBox(
-                                        height: SizeConfig.scaleHeight(AppSize.s36),
-                                        width: SizeConfig.scaleWidth(AppSize.s36),
-                                        child: Lottie.asset(
-                                          JsonAssets.loading2,
-                                          fit: BoxFit.contain,
-                                        ),
-                                      )
-                                    : Text(
-                                        AppStrings.signIn,
-                                        style: TextStyle(
-                                          fontSize: SizeConfig.scaleText(FontSize.s16),
-                                          fontWeight: FontWeightManager.semiBold,
-                                        ),
-                                      ),
-                              ),
-                            );
-                          },
-                        ),
-
-                        // OR Divider with better spacing
-                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p32)),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Divider(
-                                color: ColorManager.greyfield.withOpacity(0.5),
-                                thickness: 1,
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: SizeConfig.scaleWidth(AppPadding.p16),
-                              ),
-                              child: Text(
-                                AppStrings.or,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: ColorManager.grey,
-                                  fontSize: SizeConfig.scaleText(FontSize.s14),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Divider(
-                                color: ColorManager.greyfield.withOpacity(0.5),
-                                thickness: 1,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p24)),
-
-                        // Sign Up Navigation with better styling
-                        Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                AppStrings.dontHaveAccount,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  fontSize: SizeConfig.scaleText(FontSize.s15),
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  if (kDebugMode) print('navigate to register');
-                                  RouteGenerator.navigateAndRemoveUntil(
-                                    context,
-                                    Routes.registerRoute,
-                                  );
-                                },
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: SizeConfig.scaleWidth(AppPadding.p8),
-                                  ),
-                                ),
-                                child: Text(
-                                  AppStrings.signUp,
-                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: ColorManager.primary,
-                                    fontSize: SizeConfig.scaleText(FontSize.s15),
-                                    fontWeight: FontWeightManager.semiBold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        
-                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p20)),
-                      ],
-                    ),
+                // Logo with modern styling
+                Center(
+                  child: Image.asset(
+                    ImagesAssets.appLogo,
+                    height: SizeConfig.scaleHeight(AppSize.s120),
+                    width: SizeConfig.scaleWidth(AppSize.s150),
                   ),
                 ),
-              ),
+
+                SizedBox(height: SizeConfig.scaleHeight(AppPadding.p24)),
+
+                // Welcome text with better hierarchy
+                Text(
+                  AppStrings.welcomeBack,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    fontSize: SizeConfig.scaleText(FontSize.s28),
+                    fontWeight: FontWeightManager.bold,
+                  ),
+                ),
+                SizedBox(height: SizeConfig.scaleHeight(AppPadding.p6)),
+                Text(
+                  AppStrings.signToContinue,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontSize: SizeConfig.scaleText(FontSize.s15),
+                    color: ColorManager.grey,
+                  ),
+                ),
+
+                SizedBox(height: SizeConfig.scaleHeight(AppPadding.p32)),
+
+                // Email Field
+                authBuildTextField(
+                  controller: _emailController,
+                  labelText: AppStrings.email,
+                  hintText: AppStrings.enterYourEmail,
+                  keyboardType: TextInputType.emailAddress,
+                  validationStream: _viewModel.outIsEmailValid,
+                ),
+                SizedBox(height: SizeConfig.scaleHeight(AppPadding.p16)),
+
+                // Password Field
+                authBuildTextField(
+                  controller: _passwordController,
+                  labelText: AppStrings.password,
+                  hintText: AppStrings.enterYourPassword,
+                  keyboardType: TextInputType.visiblePassword,
+                  obscureText: true,
+                  validationStream: _viewModel.outIsPasswordValid,
+                ),
+                SizedBox(height: SizeConfig.scaleHeight(AppPadding.p12)),
+
+                // Remember Me + Forgot Password with improved layout
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        SizedBox(
+                          height: SizeConfig.scaleHeight(AppSize.s24),
+                          width: SizeConfig.scaleWidth(AppSize.s24),
+                          child: Checkbox(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                SizeConfig.scaleSize(AppSize.s6),
+                              ),
+                            ),
+                            side: BorderSide(
+                              width: SizeConfig.scaleWidth(AppSize.s1_5),
+                              color: ColorManager.greyfield,
+                            ),
+                            value: _rememberMe,
+                            activeColor: ColorManager.primary,
+                            onChanged: (value) {
+                              setState(() {
+                                _rememberMe = value ?? false;
+                              });
+                              _viewModel.setRememberMe(_rememberMe);
+                              debugPrint('[LoginView] Remember me set to: $_rememberMe');
+                            },
+                          ),
+                        ),
+                        SizedBox(width: SizeConfig.scaleWidth(AppSize.s8)),
+                        Text(
+                          AppStrings.rememberMe,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontSize: SizeConfig.scaleText(FontSize.s14),
+                          ),
+                        ),
+                      ],
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          Routes.forgetPasswordRoute,
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: SizeConfig.scaleWidth(AppPadding.p8),
+                          vertical: SizeConfig.scaleHeight(AppPadding.p4),
+                        ),
+                      ),
+                      child: Text(
+                        AppStrings.forgotPasswrod,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: ColorManager.primary,
+                          fontWeight: FontWeightManager.medium,
+                          fontSize: SizeConfig.scaleText(FontSize.s14),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: SizeConfig.scaleHeight(AppPadding.p24)),
+
+                // Sign In Button with improved design
+                StreamBuilder<bool>(
+                  stream: _viewModel.outIsLoading,
+                  initialData: false,
+                  builder: (context, snapshot) {
+                    final isLoading = snapshot.data ?? false;
+
+                    return Container(
+                      width: double.infinity,
+                      height: SizeConfig.scaleHeight(AppHeight.h56),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(
+                          SizeConfig.scaleSize(AppSize.s12),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: ColorManager.primary.withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () {
+                                if (_formKey.currentState?.validate() ?? false) {
+                                  _viewModel.login();
+                                }
+                              },
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              SizeConfig.scaleSize(AppSize.s12),
+                            ),
+                          ),
+                        ),
+                        child: isLoading
+                            ? SizedBox(
+                                height: SizeConfig.scaleHeight(AppSize.s36),
+                                width: SizeConfig.scaleWidth(AppSize.s36),
+                                child: Lottie.asset(
+                                  JsonAssets.loading2,
+                                  fit: BoxFit.contain,
+                                ),
+                              )
+                            : Text(
+                                AppStrings.signIn,
+                                style: TextStyle(
+                                  fontSize: SizeConfig.scaleText(FontSize.s16),
+                                  fontWeight: FontWeightManager.semiBold,
+                                ),
+                              ),
+                      ),
+                    );
+                  },
+                ),
+
+                const Spacer(),
+
+                // Sign Up Navigation with better styling
+                Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        AppStrings.dontHaveAccount,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontSize: SizeConfig.scaleText(FontSize.s15),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          if (kDebugMode) print('navigate to register');
+                          RouteGenerator.navigateAndRemoveUntil(
+                            context,
+                            Routes.registerRoute,
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: SizeConfig.scaleWidth(AppPadding.p8),
+                          ),
+                        ),
+                        child: Text(
+                          AppStrings.signUp,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: ColorManager.primary,
+                            fontSize: SizeConfig.scaleText(FontSize.s15),
+                            fontWeight: FontWeightManager.semiBold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: SizeConfig.scaleHeight(AppPadding.p20)),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

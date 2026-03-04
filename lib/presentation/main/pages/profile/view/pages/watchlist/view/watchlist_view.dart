@@ -1,6 +1,5 @@
 import 'package:ai_movie_suggestion/app/di.dart';
 import 'package:ai_movie_suggestion/domain/model/models.dart';
-import 'package:ai_movie_suggestion/presentation/common/state_renderer/state_render_impl.dart';
 import 'package:ai_movie_suggestion/presentation/main/pages/profile/view/pages/watchlist/viewmodel/watchlist_viewmodel.dart';
 import 'package:ai_movie_suggestion/presentation/resources/color_manager.dart';
 import 'package:ai_movie_suggestion/presentation/resources/font_manager.dart';
@@ -19,6 +18,7 @@ class _WatchlistViewState extends State<WatchlistView> {
   WatchlistViewModel? _viewModel;
   bool _isInitialized = false;
   bool _isDisposed = false;
+  String? _initializationError;
 
   @override
   void initState() {
@@ -29,26 +29,36 @@ class _WatchlistViewState extends State<WatchlistView> {
   void _initializeViewModel() async {
     try {
       if (_isDisposed) return; // Don't initialize if already disposed
-      
+
+      print('🔧 Initializing WatchlistViewModel...');
       _viewModel = instance<WatchlistViewModel>();
-      _viewModel!.start();
-      
-      // Add a small delay to ensure proper initialization
-      await Future.delayed(const Duration(milliseconds: 100));
-      
+      print('✅ WatchlistViewModel instance obtained');
+
       if (!_isDisposed && mounted) {
-        await _viewModel!.loadLikedMovies();
+        print('📋 Loading liked movies...');
+        // Call start() which will load liked movies
+        // Note: We don't listen to outputState stream to avoid navigation issues
+        _viewModel!.start();
+
+        // Wait a bit for the async loading to complete
+        await Future.delayed(const Duration(milliseconds: 500));
+        print('✅ Liked movies loaded');
+
         if (mounted) {
           setState(() {
             _isInitialized = true;
+            _initializationError = null;
           });
+          print('✅ Watchlist view initialized successfully');
         }
       }
-    } catch (e) {
-      print('Error initializing WatchlistViewModel: $e');
+    } catch (e, stackTrace) {
+      print('❌ Error initializing WatchlistViewModel: $e');
+      print('Stack trace: $stackTrace');
       if (mounted) {
         setState(() {
           _isInitialized = false;
+          _initializationError = e.toString();
         });
       }
     }
@@ -98,7 +108,98 @@ class _WatchlistViewState extends State<WatchlistView> {
             ),
         ],
       ),
-      body: _isInitialized ? _buildContent() : _buildLoadingState(),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_initializationError != null) {
+      return _buildInitializationError();
+    }
+
+    if (_isInitialized) {
+      return _buildContent();
+    }
+
+    return _buildLoadingState();
+  }
+
+  Widget _buildInitializationError() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: AppSize.s80,
+            color: ColorManager.error,
+          ),
+          const SizedBox(height: AppSize.s20),
+          Text(
+            'Failed to Initialize',
+            style: TextStyle(
+              fontSize: FontSize.s24,
+              fontWeight: FontWeightManager.bold,
+              color: ColorManager.white,
+            ),
+          ),
+          const SizedBox(height: AppSize.s12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppPadding.p32),
+            child: Text(
+              _initializationError ?? 'An unknown error occurred',
+              style: TextStyle(
+                fontSize: FontSize.s14,
+                color: ColorManager.grey,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: AppSize.s32),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ColorManager.grey,
+                  foregroundColor: ColorManager.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppPadding.p24,
+                    vertical: AppPadding.p12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppSize.s12),
+                  ),
+                ),
+                child: const Text('Go Back'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _initializationError = null;
+                    _isInitialized = false;
+                  });
+                  _initializeViewModel();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ColorManager.primary,
+                  foregroundColor: ColorManager.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppPadding.p24,
+                    vertical: AppPadding.p12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppSize.s12),
+                  ),
+                ),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -128,21 +229,9 @@ class _WatchlistViewState extends State<WatchlistView> {
       return _buildLoadingState();
     }
 
-    return StreamBuilder<FlowState>(
-      stream: _viewModel!.outputState,
-      builder: (context, snapshot) {
-        return snapshot.data?.getScreenWidget(
-              context,
-              _getContentWidget(),
-              () {
-                if (!_isDisposed && mounted && _viewModel != null) {
-                  _viewModel!.refreshWatchlist();
-                }
-              },
-            ) ??
-            _getContentWidget();
-      },
-    );
+    // Don't use FlowState for watchlist page as it causes navigation issues
+    // The page manages its own loading/error states
+    return _getContentWidget();
   }
 
   Widget _getContentWidget() {
