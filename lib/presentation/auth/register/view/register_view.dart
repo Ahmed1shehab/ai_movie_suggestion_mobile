@@ -19,7 +19,6 @@ class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _RegisterViewState createState() => _RegisterViewState();
 }
 
@@ -30,8 +29,7 @@ class _RegisterViewState extends State<RegisterView> {
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   _bind() {
@@ -59,16 +57,20 @@ class _RegisterViewState extends State<RegisterView> {
   @override
   void initState() {
     super.initState();
-
     _bind();
   }
 
   @override
   void dispose() {
     _viewModel.dispose();
+    _fullNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     return StreamBuilder<FlowState>(
       stream: _viewModel.outputState,
@@ -88,163 +90,241 @@ class _RegisterViewState extends State<RegisterView> {
   Widget _getContentWidget(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorManager.white,
-      body: Column(
-        children: [
-          SizedBox(height: SizeConfig.scaleHeight(AppPadding.p12)),
-          Image.asset(
-            ImagesAssets.appLogo,
-            height: SizeConfig.scaleHeight(AppSize.s100),
-            width: SizeConfig.scaleWidth(AppSize.s100),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                horizontal: SizeConfig.scaleWidth(AppPadding.p16),
-              ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Text(
-                        AppStrings.createAccount,
-                        style: Theme.of(context).textTheme.labelLarge,
-                      ),
-                    ),
-                    SizedBox(height: SizeConfig.scaleHeight(AppPadding.p8)),
-                    Center(
-                      child: Text(
-                        AppStrings.join,
-                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            fontSize: SizeConfig.scaleText(FontSize.s16)),
-                      ),
-                    ),
-                    SizedBox(height: SizeConfig.scaleHeight(AppPadding.p20)),
-                    authBuildTextField(
-                      controller: _fullNameController,
-                      labelText: AppStrings.fullName,
-                      hintText: AppStrings.enterYourFullName,
-                      keyboardType: TextInputType.text,
-                      validationStream: _viewModel.outIsFullNameValid,
-                    ),
-                    SizedBox(height: SizeConfig.scaleHeight(AppPadding.p16)),
-
-                    /// Email Field
-                    authBuildTextField(
-                      controller: _emailController,
-                      labelText: AppStrings.email,
-                      hintText: AppStrings.enterYourEmail,
-                      keyboardType: TextInputType.emailAddress,
-                      validationStream: _viewModel.outIsEmailValid,
-                    ),
-                    SizedBox(height: SizeConfig.scaleHeight(AppPadding.p16)),
-
-                    /// Password Field
-                    authBuildTextField(
-                      controller: _passwordController,
-                      labelText: AppStrings.password,
-                      hintText: AppStrings.enterYourPassword,
-                      keyboardType: TextInputType.visiblePassword,
-                      obscureText: true,
-                      validationStream: _viewModel.outIsPasswordValid,
-                    ),
-                    SizedBox(height: SizeConfig.scaleHeight(AppPadding.p8)),
-                    authBuildTextField(
-                      controller: _confirmPasswordController,
-                      labelText: AppStrings.confirmPassword,
-                      hintText: AppStrings.confirmYourPassword,
-                      keyboardType: TextInputType.visiblePassword,
-                      obscureText: true,
-                      validationStream: _viewModel.outIsConfirmPasswordValid,
-                    ),
-                    SizedBox(height: SizeConfig.scaleHeight(AppPadding.p8)),
-
-                    /// Sign In Button
-                    StreamBuilder<bool>(
-                      stream: _viewModel.outIsLoading,
-                      initialData: false,
-                      builder: (context, snapshot) {
-                        final isLoading = snapshot.data ?? false;
-
-                        return SizedBox(
-                          width: double.infinity,
-                          height: SizeConfig.scaleHeight(AppHeight.h48),
-                          child: ElevatedButton(
-                            onPressed: isLoading
-                                ? null
-                                : () {
-                                    if (_formKey.currentState?.validate() ??
-                                        false) {
-                                      _viewModel.register();
-                                    }
-                                  },
-                            child: isLoading
-                                ? SizedBox(
-                                    height: SizeConfig.scaleHeight(AppSize.s40),
-                                    width: SizeConfig.scaleWidth(AppSize.s40),
-                                    child: Lottie.asset(
-                                      JsonAssets.loading2,
-                                      fit: BoxFit.contain,
-                                    ),
-                                  )
-                                : const Text(AppStrings.createAccount),
-                          ),
-                        );
-                      },
-                    ),
-                    
-
-                    /// OR Divider
-                    SizedBox(height: SizeConfig.scaleHeight(AppPadding.p36)),
-                    Row(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: SizeConfig.scaleWidth(AppPadding.p28),
+                  ),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Expanded(child: Divider()),
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: SizeConfig.scaleWidth(8)),
-                          child: Text(
-                            AppStrings.or,
-                            style: Theme.of(context).textTheme.bodySmall,
+                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p32)),
+                        
+                        // Logo with modern styling
+                        Center(
+                          child: Container(
+                            padding: EdgeInsets.all(SizeConfig.scaleSize(AppPadding.p16)),
+                            decoration: BoxDecoration(
+                              color: ColorManager.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(SizeConfig.scaleSize(AppSize.s24)),
+                            ),
+                            child: Image.asset(
+                              ImagesAssets.appLogo,
+                              height: SizeConfig.scaleHeight(AppSize.s70),
+                              width: SizeConfig.scaleWidth(AppSize.s70),
+                            ),
                           ),
                         ),
-                        const Expanded(child: Divider()),
-                      ],
-                    ),
+                        
+                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p32)),
+                        
+                        // Create Account text with better hierarchy
+                        Text(
+                          AppStrings.createAccount,
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontSize: SizeConfig.scaleText(FontSize.s28),
+                            fontWeight: FontWeightManager.bold,
+                          ),
+                        ),
+                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p8)),
+                        Text(
+                          AppStrings.join,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontSize: SizeConfig.scaleText(FontSize.s15),
+                            color: ColorManager.grey,
+                          ),
+                        ),
+                        
+                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p32)),
 
-                    SizedBox(height: SizeConfig.scaleHeight(AppPadding.p14)),
+                        // Full Name Field
+                        authBuildTextField(
+                          controller: _fullNameController,
+                          labelText: AppStrings.fullName,
+                          hintText: AppStrings.enterYourFullName,
+                          keyboardType: TextInputType.text,
+                          validationStream: _viewModel.outIsFullNameValid,
+                        ),
+                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p20)),
 
-                    /// Sign Up Navigation
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(AppStrings.alreadyHaveAccount,
-                            style: Theme.of(context).textTheme.bodySmall),
-                        TextButton(
-                          onPressed: () {
-                            if (kDebugMode) print('navigate to Login');
-                            RouteGenerator.navigateAndRemoveUntil(
-                                context, Routes.loginRoute);
+                        // Email Field
+                        authBuildTextField(
+                          controller: _emailController,
+                          labelText: AppStrings.email,
+                          hintText: AppStrings.enterYourEmail,
+                          keyboardType: TextInputType.emailAddress,
+                          validationStream: _viewModel.outIsEmailValid,
+                        ),
+                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p20)),
+
+                        // Password Field
+                        authBuildTextField(
+                          controller: _passwordController,
+                          labelText: AppStrings.password,
+                          hintText: AppStrings.enterYourPassword,
+                          keyboardType: TextInputType.visiblePassword,
+                          obscureText: true,
+                          validationStream: _viewModel.outIsPasswordValid,
+                        ),
+                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p20)),
+
+                        // Confirm Password Field
+                        authBuildTextField(
+                          controller: _confirmPasswordController,
+                          labelText: AppStrings.confirmPassword,
+                          hintText: AppStrings.confirmYourPassword,
+                          keyboardType: TextInputType.visiblePassword,
+                          obscureText: true,
+                          validationStream: _viewModel.outIsConfirmPasswordValid,
+                        ),
+                        
+                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p28)),
+
+                        // Create Account Button with improved design
+                        StreamBuilder<bool>(
+                          stream: _viewModel.outIsLoading,
+                          initialData: false,
+                          builder: (context, snapshot) {
+                            final isLoading = snapshot.data ?? false;
+
+                            return Container(
+                              width: double.infinity,
+                              height: SizeConfig.scaleHeight(AppHeight.h56),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                  SizeConfig.scaleSize(AppSize.s12),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: ColorManager.primary.withOpacity(0.3),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: ElevatedButton(
+                                onPressed: isLoading
+                                    ? null
+                                    : () {
+                                        if (_formKey.currentState?.validate() ?? false) {
+                                          _viewModel.register();
+                                        }
+                                      },
+                                style: ElevatedButton.styleFrom(
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      SizeConfig.scaleSize(AppSize.s12),
+                                    ),
+                                  ),
+                                ),
+                                child: isLoading
+                                    ? SizedBox(
+                                        height: SizeConfig.scaleHeight(AppSize.s36),
+                                        width: SizeConfig.scaleWidth(AppSize.s36),
+                                        child: Lottie.asset(
+                                          JsonAssets.loading2,
+                                          fit: BoxFit.contain,
+                                        ),
+                                      )
+                                    : Text(
+                                        AppStrings.createAccount,
+                                        style: TextStyle(
+                                          fontSize: SizeConfig.scaleText(FontSize.s16),
+                                          fontWeight: FontWeightManager.semiBold,
+                                        ),
+                                      ),
+                              ),
+                            );
                           },
-                          child: Text(
-                            AppStrings.signIn,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall!
-                                .copyWith(
-                                  color: ColorManager.primary,
+                        ),
+
+                        // OR Divider with better spacing
+                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p32)),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Divider(
+                                color: ColorManager.greyfield.withOpacity(0.5),
+                                thickness: 1,
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: SizeConfig.scaleWidth(AppPadding.p16),
+                              ),
+                              child: Text(
+                                AppStrings.or,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: ColorManager.grey,
                                   fontSize: SizeConfig.scaleText(FontSize.s14),
                                 ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Divider(
+                                color: ColorManager.greyfield.withOpacity(0.5),
+                                thickness: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p24)),
+
+                        // Sign In Navigation with better styling
+                        Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                AppStrings.alreadyHaveAccount,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  fontSize: SizeConfig.scaleText(FontSize.s15),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  if (kDebugMode) print('navigate to Login');
+                                  RouteGenerator.navigateAndRemoveUntil(
+                                    context,
+                                    Routes.loginRoute,
+                                  );
+                                },
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: SizeConfig.scaleWidth(AppPadding.p8),
+                                  ),
+                                ),
+                                child: Text(
+                                  AppStrings.signIn,
+                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: ColorManager.primary,
+                                    fontSize: SizeConfig.scaleText(FontSize.s15),
+                                    fontWeight: FontWeightManager.semiBold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+                        
+                        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p20)),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -12,7 +12,6 @@ import 'package:ai_movie_suggestion/presentation/resources/routes_manager.dart';
 import 'package:ai_movie_suggestion/presentation/resources/string_manager.dart';
 import 'package:ai_movie_suggestion/presentation/resources/values_manager.dart';
 import 'package:flutter/gestures.dart';
-
 import 'package:flutter/material.dart';
 
 class VerifyEmailView extends StatefulWidget {
@@ -27,6 +26,7 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
   final AppPreferences _appPreferences = instance<AppPreferences>();
   final TextEditingController _codeController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
   void _bind() async {
     _viewModel.start();
     _viewModel.startCountdown();
@@ -50,16 +50,17 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
   @override
   void initState() {
     super.initState();
-
     _bind();
   }
 
   @override
   void dispose() {
     _viewModel.dispose();
+    _codeController.dispose();
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     return StreamBuilder<FlowState>(
       stream: _viewModel.outputState,
@@ -81,325 +82,329 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
 
   Widget _getContentWidget(BuildContext context) {
     return Scaffold(
+      backgroundColor: ColorManager.white,
       appBar: AppBar(
-        leading: const BackButton(),
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: SizeConfig.scaleSize(AppSize.s20),
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Text(
           AppStrings.back,
-          style: Theme.of(context).textTheme.displayMedium,
+          style: Theme.of(context).textTheme.displayMedium?.copyWith(
+            fontSize: SizeConfig.scaleText(FontSize.s18),
+            fontWeight: FontWeightManager.semiBold,
+          ),
         ),
         centerTitle: false,
         backgroundColor: ColorManager.white,
         elevation: 0,
       ),
-      backgroundColor: ColorManager.white,
-      body: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-        const SizedBox(height: 12),
-        Image.asset(
-          ImagesAssets.mail,
-        ),
-        const SizedBox(height: 16),
-        Text(
-          AppStrings.verifyYourEmail,
-          style: Theme.of(context)
-              .textTheme
-              .labelLarge!
-              .copyWith(fontSize: SizeConfig.scaleText(FontSize.s28)),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: SizeConfig.scaleWidth(AppPadding.p26)),
-          child: Text(
-            AppStrings.verifyYourEmailDesc,
-            textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall!
-                .copyWith(fontSize: SizeConfig.scaleText(FontSize.s16)),
-          ),
-        ),
-        const SizedBox(height: 30),
-        authBuildTextField(
-          controller: _codeController,
-          labelText: AppStrings.verifyCode,
-          hintText: AppStrings.enterCode,
-          keyboardType: TextInputType.number,
-          validationStream: _viewModel.outputIsCodeValid,
-          onChanged: (value) {
-            _viewModel.setCode(value); // <-- this is CRITICAL
-          },
-        ),
-        SizedBox(height: SizeConfig.scaleHeight(AppPadding.p16)),
-        StreamBuilder(
-          stream: _viewModel.outputAreAllInputsValid,
-          builder: (context, snapshot) {
-            final areInputsValid = snapshot.data ?? false;
-            return Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: SizeConfig.scaleWidth(AppPadding.p26)),
-              child: SizedBox(
-                width: double.infinity,
-                height: SizeConfig.scaleHeight(AppHeight.h48),
-                child: ElevatedButton(
-                  onPressed: areInputsValid
-                      ? () {
-                          final email = _appPreferences.getRegisterEmail();
-                          if (email == null || email.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(AppStrings.emailNotFound),
-                                backgroundColor: Colors.red,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: SizeConfig.scaleWidth(AppPadding.p28),
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: SizeConfig.scaleHeight(AppPadding.p24)),
+                  
+                  // Email Icon with modern styling
+                  Container(
+                    padding: EdgeInsets.all(SizeConfig.scaleSize(AppPadding.p20)),
+                    decoration: BoxDecoration(
+                      color: ColorManager.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Image.asset(
+                      ImagesAssets.mail,
+                      height: SizeConfig.scaleHeight(AppSize.s80),
+                      width: SizeConfig.scaleWidth(AppSize.s80),
+                    ),
+                  ),
+                  
+                  SizedBox(height: SizeConfig.scaleHeight(AppPadding.p28)),
+                  
+                  // Title
+                  Text(
+                    AppStrings.verifyYourEmail,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      fontSize: SizeConfig.scaleText(FontSize.s28),
+                      fontWeight: FontWeightManager.bold,
+                    ),
+                  ),
+                  
+                  SizedBox(height: SizeConfig.scaleHeight(AppPadding.p12)),
+                  
+                  // Description
+                  Text(
+                    AppStrings.verifyYourEmailDesc,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: SizeConfig.scaleText(FontSize.s15),
+                      color: ColorManager.grey,
+                      height: 1.5,
+                    ),
+                  ),
+                  
+                  SizedBox(height: SizeConfig.scaleHeight(AppPadding.p36)),
+                  
+                  // Verification Code Field
+                  authBuildTextField(
+                    controller: _codeController,
+                    labelText: AppStrings.verifyCode,
+                    hintText: AppStrings.enterCode,
+                    keyboardType: TextInputType.number,
+                    validationStream: _viewModel.outputIsCodeValid,
+                    onChanged: (value) {
+                      _viewModel.setCode(value);
+                    },
+                  ),
+                  
+                  SizedBox(height: SizeConfig.scaleHeight(AppPadding.p24)),
+                  
+                  // Verify Button
+                  StreamBuilder(
+                    stream: _viewModel.outputAreAllInputsValid,
+                    builder: (context, snapshot) {
+                      final areInputsValid = snapshot.data ?? false;
+                      return Container(
+                        width: double.infinity,
+                        height: SizeConfig.scaleHeight(AppHeight.h56),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(
+                            SizeConfig.scaleSize(AppSize.s12),
+                          ),
+                          boxShadow: areInputsValid
+                              ? [
+                                  BoxShadow(
+                                    color: ColorManager.primary.withOpacity(0.3),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ]
+                              : [],
+                        ),
+                        child: ElevatedButton(
+                          onPressed: areInputsValid
+                              ? () {
+                                  final email = _appPreferences.getRegisterEmail();
+                                  if (email == null || email.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: const Text(AppStrings.emailNotFound),
+                                        backgroundColor: ColorManager.error,
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            SizeConfig.scaleSize(AppSize.s8),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  _viewModel.verifyEmail(email, _codeController.text);
+                                }
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                SizeConfig.scaleSize(AppSize.s12),
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            AppStrings.verifyEmail,
+                            style: TextStyle(
+                              fontSize: SizeConfig.scaleText(FontSize.s16),
+                              fontWeight: FontWeightManager.semiBold,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  
+                  SizedBox(height: SizeConfig.scaleHeight(AppPadding.p24)),
+                  
+                  // Timer Section
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: SizeConfig.scaleWidth(AppPadding.p16),
+                      vertical: SizeConfig.scaleHeight(AppPadding.p12),
+                    ),
+                    decoration: BoxDecoration(
+                      color: ColorManager.error.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(
+                        SizeConfig.scaleSize(AppSize.s12),
+                      ),
+                      border: Border.all(
+                        color: ColorManager.error.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.timer_rounded,
+                          color: ColorManager.error,
+                          size: SizeConfig.scaleSize(AppSize.s20),
+                        ),
+                        SizedBox(width: SizeConfig.scaleWidth(AppSize.s8)),
+                        Text(
+                          "Code expires in: ",
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: ColorManager.error,
+                            fontWeight: FontWeightManager.medium,
+                            fontSize: SizeConfig.scaleText(FontSize.s14),
+                          ),
+                        ),
+                        StreamBuilder<String>(
+                          stream: _viewModel.outputCountdown,
+                          initialData: AppConstants.initalCodeExpiry,
+                          builder: (context, snapshot) {
+                            return Text(
+                              snapshot.data ?? AppConstants.initalCodeExpiry,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: ColorManager.error,
+                                fontWeight: FontWeightManager.bold,
+                                fontSize: SizeConfig.scaleText(FontSize.s14),
                               ),
                             );
-                            return;
-                          }
-
-                          _viewModel.verifyEmail(email, _codeController.text);
-                        }
-                      : null,
-                  child: const Text(AppStrings.verifyEmail),
-                ),
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.timer, color: Colors.red, size: 18),
-            const SizedBox(width: 4),
-            Text(
-              "Code expires in: ",
-              style: TextStyle(color: Colors.red.shade700),
-            ),
-            StreamBuilder<String>(
-              stream: _viewModel.outputCountdown,
-              initialData: AppConstants.initalCodeExpiry,
-              builder: (context, snapshot) {
-                return Text(
-                  snapshot.data ?? AppConstants.initalCodeExpiry,
-                  style: Theme.of(context).textTheme.bodySmall,
-                );
-              },
-            ),
-          ],
-        ),
-        Divider(
-            color: ColorManager.error, thickness: 4, indent: 50, endIndent: 50),
-        const SizedBox(height: 12),
-        Text.rich(
-          TextSpan(
-            text: AppStrings.didntReceive,
-            children: [
-              TextSpan(
-                text: AppStrings.resendCode,
-                style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                      color: ColorManager.primary,
-                      fontSize: SizeConfig.scaleText(FontSize.s14),
-                    ),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () {
-                    // TODO: Resend code logic
-                  },
-              ),
-            ],
-          ),
-        ),
-        Padding(
-            padding: const EdgeInsets.all(14.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.info_outline, color: ColorManager.primary),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppStrings.importantInfo,
-                          style: Theme.of(context).textTheme.titleSmall,
+                          },
                         ),
-                        const SizedBox(height: 8),
-                        const Text(AppStrings.importantInfoDesc1),
-                        const Text(AppStrings.importantInfoDesc2),
-                        const Text(AppStrings.importantInfoDesc3),
                       ],
                     ),
                   ),
+                  
+                  SizedBox(height: SizeConfig.scaleHeight(AppPadding.p24)),
+                  
+                  // Resend Code
+                  Text.rich(
+                    TextSpan(
+                      text: AppStrings.didntReceive,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontSize: SizeConfig.scaleText(FontSize.s15),
+                      ),
+                      children: [
+                        TextSpan(
+                          text: AppStrings.resendCode,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: ColorManager.primary,
+                            fontSize: SizeConfig.scaleText(FontSize.s15),
+                            fontWeight: FontWeightManager.semiBold,
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              // TODO: Resend code logic
+                            },
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  SizedBox(height: SizeConfig.scaleHeight(AppPadding.p28)),
+                  
+                  // Important Information Card
+                  Container(
+                    decoration: BoxDecoration(
+                      color: ColorManager.primary.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(
+                        SizeConfig.scaleSize(AppSize.s16),
+                      ),
+                      border: Border.all(
+                        color: ColorManager.primary.withOpacity(0.2),
+                        width: 1,
+                      ),
+                    ),
+                    padding: EdgeInsets.all(SizeConfig.scaleSize(AppPadding.p20)),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(SizeConfig.scaleSize(AppSize.s8)),
+                          decoration: BoxDecoration(
+                            color: ColorManager.primary.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.info_rounded,
+                            color: ColorManager.primary,
+                            size: SizeConfig.scaleSize(AppSize.s20),
+                          ),
+                        ),
+                        SizedBox(width: SizeConfig.scaleWidth(AppPadding.p12)),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                AppStrings.importantInfo,
+                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeightManager.bold,
+                                  fontSize: SizeConfig.scaleText(FontSize.s16),
+                                ),
+                              ),
+                              SizedBox(height: SizeConfig.scaleHeight(AppSize.s12)),
+                              _buildInfoPoint(context, AppStrings.importantInfoDesc1),
+                              SizedBox(height: SizeConfig.scaleHeight(AppSize.s6)),
+                              _buildInfoPoint(context, AppStrings.importantInfoDesc2),
+                              SizedBox(height: SizeConfig.scaleHeight(AppSize.s6)),
+                              _buildInfoPoint(context, AppStrings.importantInfoDesc3),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  SizedBox(height: SizeConfig.scaleHeight(AppPadding.p28)),
                 ],
               ),
-            )),
-      ]),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoPoint(BuildContext context, String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: EdgeInsets.only(top: SizeConfig.scaleHeight(AppSize.s6)),
+          height: SizeConfig.scaleSize(AppSize.s6),
+          width: SizeConfig.scaleSize(AppSize.s6),
+          decoration: BoxDecoration(
+            color: ColorManager.primary.withOpacity(0.6),
+            shape: BoxShape.circle,
+          ),
+        ),
+        SizedBox(width: SizeConfig.scaleWidth(AppSize.s8)),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontSize: SizeConfig.scaleText(FontSize.s14),
+              color: ColorManager.secondaryBlack,
+              height: 1.5,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
-
-// class _VerifyEmailViewState extends State<VerifyEmailView> {
-
-//   final TextEditingController _codeController = TextEditingController();
-//   Duration _remainingTime = const Duration(minutes: 59, seconds: 42);
-//   late final Timer _timer;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _startCountdown();
-//   }
-
-//   void _startCountdown() {
-//     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-//       if (_remainingTime.inSeconds > 0) {
-//         setState(() {
-//           _remainingTime -= const Duration(seconds: 1);
-//         });
-//       } else {
-//         timer.cancel();
-//       }
-//     });
-//   }
-
-//   String _formatDuration(Duration d) {
-//     String twoDigits(int n) => n.toString().padLeft(2, '0');
-//     return '${twoDigits(d.inMinutes)}:${twoDigits(d.inSeconds % 60)}';
-//   }
-
-//   @override
-//   void dispose() {
-//     _timer.cancel();
-//     _codeController.dispose();
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         leading: const BackButton(),
-//         backgroundColor: ColorManager.white,
-//         elevation: 0,
-//       ),
-//       body: Padding(
-//         padding: const EdgeInsets.all(26.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.center,
-//           children: [
-//             const Icon(Icons.mark_email_read_outlined, size: 64, color: Colors.deepPurple),
-//             const SizedBox(height: 16),
-//             const Text(
-//               "Verify Your Email",
-//               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-//             ),
-//             const SizedBox(height: 12),
-//             const Text(
-//               "We've sent a 6-digit verification code to your email address. Enter the code below to complete your registration.",
-//               textAlign: TextAlign.center,
-//               style: TextStyle(fontSize: 14, color: Colors.grey),
-//             ),
-//             const SizedBox(height: 24),
-//             Align(
-//               alignment: Alignment.centerLeft,
-//               child: Text(
-//                 "Verification Code",
-//                 style: TextStyle(fontWeight: FontWeight.w500),
-//               ),
-//             ),
-//             const SizedBox(height: 8),
-//             TextField(
-//               controller: _codeController,
-//               keyboardType: TextInputType.number,
-//               maxLength: 6,
-//               decoration: InputDecoration(
-//                 hintText: 'Enter 6-digit code',
-//                 counterText: '',
-//                 border: OutlineInputBorder(
-//                   borderRadius: BorderRadius.circular(12),
-//                 ),
-//               ),
-//             ),
-//             const SizedBox(height: 16),
-//             SizedBox(
-//               width: double.infinity,
-//               child: ElevatedButton(
-//                 onPressed: () {
-//                   // TODO: Implement verification logic
-//                 },
-//                 style: ElevatedButton.styleFrom(
-//                   backgroundColor: Colors.deepPurple,
-//                   padding: const EdgeInsets.symmetric(vertical: 16),
-//                   shape: RoundedRectangleBorder(
-//                     borderRadius: BorderRadius.circular(12),
-//                   ),
-//                 ),
-//                 child: const Text("Verify Email", style: TextStyle(color: Colors.white)),
-//               ),
-//             ),
-//             const SizedBox(height: 16),
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.center,
-//               children: [
-//                 const Icon(Icons.timer, color: Colors.red, size: 18),
-//                 const SizedBox(width: 4),
-//                 Text(
-//                   "Code expires in: ",
-//                   style: TextStyle(color: Colors.red.shade700),
-//                 ),
-//                 Text(
-//                   _formatDuration(_remainingTime),
-//                   style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-//                 ),
-//               ],
-//             ),
-//             Divider(color: ColorManager.error, thickness: 4, indent: 50, endIndent: 50),
-//             const SizedBox(height: 12),
-//             Text.rich(
-//               TextSpan(
-//                 text: "Didn't receive the code? ",
-//                 children: [
-//                   TextSpan(
-//                     text: "Resend Code",
-//                     style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold),
-//                     recognizer: TapGestureRecognizer()
-//                       ..onTap = () {
-//                         // TODO: Resend code logic
-//                       },
-//                   ),
-//                 ],
-//               ),
-//             ),
-
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-//             // const SizedBox(height: 24),
-
-// Container(
-//   decoration: BoxDecoration(
-//     color: Colors.grey.shade100,
-//     borderRadius: BorderRadius.circular(12),
-//   ),
-//   padding: const EdgeInsets.all(16),
-//   child: const Column(
-//     crossAxisAlignment: CrossAxisAlignment.start,
-//     children: [
-//       Text(
-//         "Important Information",
-//         style: TextStyle(fontWeight: FontWeight.bold),
-//       ),
-//       SizedBox(height: 8),
-//       Text("◦ Check your spam/junk folder if you don't see the email"),
-//       Text("◦ The verification code expires after 1 hour"),
-//       Text("◦ You can request a new code if this one expires"),
-//     ],
-//   ),
-// ),

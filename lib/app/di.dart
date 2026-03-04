@@ -35,57 +35,84 @@ import 'package:ai_movie_suggestion/presentation/main/pages/profile/view/pages/w
 import 'package:ai_movie_suggestion/presentation/main/pages/profile/viewmodel/profile_viewmodel.dart';
 import 'package:ai_movie_suggestion/presentation/main/pages/suggest_me/viewmodel/suggest_me_viewmodel.dart';
 import 'package:ai_movie_suggestion/presentation/send_notifcations/viewmodel/send_notifications_viewmodel.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final instance = GetIt.instance;
 Future<void> initAppModule() async {
-  final sharedPrefs = await SharedPreferences.getInstance();
-  instance.registerLazySingleton<SharedPreferences>(() => sharedPrefs);
+  // Shared Preferences
+  if (!instance.isRegistered<SharedPreferences>()) {
+    final sharedPrefs = await SharedPreferences.getInstance();
+    instance.registerLazySingleton<SharedPreferences>(() => sharedPrefs);
+  }
 
   // App preferences
-  instance
-      .registerLazySingleton<AppPreferences>(() => AppPreferences(instance()));
+  if (!instance.isRegistered<AppPreferences>()) {
+    instance.registerLazySingleton<AppPreferences>(() => AppPreferences(instance()));
+  }
 
-  // Network info
-  instance.registerLazySingleton<NetworkInfo>(
-    () => NetworkInfoImpl(InternetConnectionChecker.createInstance()),
-  );
+  // Network info - Connectivity
+  if (!instance.isRegistered<Connectivity>()) {
+    instance.registerFactory<Connectivity>(() => Connectivity());
+  }
+
+  // Network info - NetworkInfo
+  if (!instance.isRegistered<NetworkInfo>()) {
+    instance.registerLazySingleton<NetworkInfo>(
+      () => NetworkInfoImpl(instance<Connectivity>()),
+    );
+  }
 
   // Dio factory
-  instance.registerLazySingleton<DioFactory>(() => DioFactory(instance()));
+  if (!instance.isRegistered<DioFactory>()) {
+    instance.registerLazySingleton<DioFactory>(() => DioFactory(instance()));
+  }
 
   // Dio instance + AppServiceClient
-  Dio dio = await instance<DioFactory>().getDio();
-  instance.registerLazySingleton<AppServiceClient>(
-    () => AppServiceClient(dio, baseUrl: Constants.baseUrl),
-  );
+  if (!instance.isRegistered<AppServiceClient>()) {
+    Dio dio = await instance<DioFactory>().getDio();
+    instance.registerLazySingleton<AppServiceClient>(
+      () => AppServiceClient(dio, baseUrl: Constants.baseUrl),
+    );
+  }
 
   // Movie API Dio instance + MovieServiceClient
-  Dio movieDio = await instance<DioFactory>().getMovieDio();
-  instance.registerLazySingleton<MovieServiceClient>(
-    () => MovieServiceClient(movieDio, baseUrl: Constants.movieBaseUrl),
-  );
+  if (!instance.isRegistered<MovieServiceClient>()) {
+    Dio movieDio = await instance<DioFactory>().getMovieDio();
+    instance.registerLazySingleton<MovieServiceClient>(
+      () => MovieServiceClient(movieDio, baseUrl: Constants.movieBaseUrl),
+    );
+  }
 
   // Remote data source
-  instance.registerLazySingleton<RemoteDataSource>(
-    () => RemoteDataSourceImpl(instance(), instance(), Constants.apiKey),
-  );
+  if (!instance.isRegistered<RemoteDataSource>()) {
+    instance.registerLazySingleton<RemoteDataSource>(
+      () => RemoteDataSourceImpl(instance(), instance(), Constants.apiKey),
+    );
+  }
+
   // Local data source
-  instance.registerLazySingleton<LocalDataSource>(
-    () => LocalDataSourceImpl(),
-  );
+  if (!instance.isRegistered<LocalDataSource>()) {
+    instance.registerLazySingleton<LocalDataSource>(
+      () => LocalDataSourceImpl(),
+    );
+  }
+
   // Local User data source
-  instance.registerLazySingleton<UserProfileLocalDataSource>(
-    () => UserProfileLocalDataSourceImpl(),
-  );
+  if (!instance.isRegistered<UserProfileLocalDataSource>()) {
+    instance.registerLazySingleton<UserProfileLocalDataSource>(
+      () => UserProfileLocalDataSourceImpl(),
+    );
+  }
 
   // Repository
-  instance.registerLazySingleton<Repository>(
-    () => RepositoryImpl(instance(), instance(), instance(), instance(), instance()),
-  );
+  if (!instance.isRegistered<Repository>()) {
+    instance.registerLazySingleton<Repository>(
+      () => RepositoryImpl(instance(), instance(), instance(), instance(), instance()),
+    );
+  }
 }
 
 initLoginModule() {

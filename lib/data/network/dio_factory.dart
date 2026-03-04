@@ -9,6 +9,27 @@ const String accept = "accept";
 const String authorization = "authorization";
 const String defaultLanguage = "language";
 
+class AuthInterceptor extends Interceptor {
+  final AppPreferences _appPreferences;
+
+  AuthInterceptor(this._appPreferences);
+
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+    // Get fresh token for every request
+    String? token = await _appPreferences.getAccessToken();
+    
+    if (token != null && token.isNotEmpty) {
+      options.headers['authorization'] = 'Bearer $token';
+      debugPrint('🔑 [AuthInterceptor] Added token to request');
+    } else {
+      debugPrint('⚠️ [AuthInterceptor] No token available');
+    }
+    
+    super.onRequest(options, handler);
+  }
+}
+
 class DioFactory {
   final AppPreferences _appPreferences;
 
@@ -18,19 +39,25 @@ class DioFactory {
     Dio dio = Dio();
 
     String language = await _appPreferences.getAppLanguage();
-    String? token = await _appPreferences.getAccessToken();
 
-    // Set base options without content-type
+    debugPrint('🔧 [DioFactory] Creating Dio instance');
+    debugPrint('🔧 [DioFactory] Base URL: ${Constants.baseUrl}');
+    debugPrint('🔧 [DioFactory] Language: $language');
+
+    // Set base options WITHOUT static token
     dio.options = BaseOptions(
       baseUrl: Constants.baseUrl,
       headers: {
         accept: applicationJson,
-        if (token != null) authorization: 'Bearer $token',
         defaultLanguage: language,
       },
       receiveTimeout: Constants.apiTimeOut,
       sendTimeout: Constants.apiTimeOut,
+      connectTimeout: Constants.apiTimeOut,
     );
+
+    // Add auth interceptor FIRST to add token dynamically
+    dio.interceptors.add(AuthInterceptor(_appPreferences));
 
     if (kDebugMode) {
       dio.interceptors.add(PrettyDioLogger(
@@ -38,17 +65,24 @@ class DioFactory {
         requestHeader: true,
         requestBody: true,
         responseHeader: true,
+        responseBody: true,
+        error: true,
+        compact: false,
+        maxWidth: 90,
       ));
     }
 
     return dio;
   }
 
-// New method for movie API (TMDB)
+  // New method for movie API (TMDB)
   Future<Dio> getMovieDio() async {
     Dio dio = Dio();
 
     String language = await _appPreferences.getAppLanguage();
+
+    debugPrint('🎬 [DioFactory] Creating Movie Dio instance');
+    debugPrint('🎬 [DioFactory] Base URL: ${Constants.movieBaseUrl}');
 
     dio.options = BaseOptions(
       baseUrl: Constants.movieBaseUrl,
@@ -58,6 +92,7 @@ class DioFactory {
       },
       receiveTimeout: Constants.apiTimeOut,
       sendTimeout: Constants.apiTimeOut,
+      connectTimeout: Constants.apiTimeOut,
     );
 
     if (kDebugMode) {
@@ -66,6 +101,10 @@ class DioFactory {
         requestHeader: true,
         requestBody: true,
         responseHeader: true,
+        responseBody: true,
+        error: true,
+        compact: false,
+        maxWidth: 90,
       ));
     }
 
